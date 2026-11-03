@@ -154,7 +154,7 @@ Free for personal play under the Aegean Game License 1.1 (AGL-1.1); see [LICENSE
 <!-- aegean:screenshots:start -->
 ## Screenshots
 
-<a href="https://github.com/AegeanWorks/Prism-Relay/commit/de3c997"><img src="assets/screenshots/2026-10-28-home.png" alt="Prism-Relay interface at 2026-10-28"></a>
+<a href="https://github.com/AegeanWorks/Prism-Relay/commit/5d7fcbe"><img src="assets/screenshots/2026-11-03-home.png" alt="Prism-Relay landing at 2026-11-03"></a>
 
-*commit `de3c997` · 2026-10-28*
+*commit `5d7fcbe` · 2026-11-03 · viewport 1440x900 · landing at HEAD; gameplay view deferred (ADR-003)*
 <!-- aegean:screenshots:end -->

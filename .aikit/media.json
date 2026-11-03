@@ -61,6 +61,25 @@
         "score": 90,
         "reviewed_at": "2026-10-28T11:49:30"
       }
+    },
+    {
+      "path": "assets/screenshots/2026-11-03-home.png",
+      "alt": "Prism-Relay landing at 2026-11-03",
+      "caption": "Landing from npm start (http://127.0.0.1:4173): hero, prism art, episode entry, zero-star progress. Gameplay view deferred until click control returns \u2014 see ADR.",
+      "commit": "5d7fcbe3e7fcb9763aaa753b3759a71981ec2ce6",
+      "taken_at": "2026-11-03",
+      "viewport": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "status": "approved",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:kilo",
+        "method": "vision",
+        "notes": "Real headless-Edge capture of the served landing: headline, prism art, entry buttons, chamber/star counters and footer all legible; matches the 10-28 keeper layout at HEAD.",
+        "score": 92,
+        "reviewed_at": "2026-11-03"
+      }
     }
   ],
   "model": "community/scriptsnsenses-sys/flux-2-dev-free"
