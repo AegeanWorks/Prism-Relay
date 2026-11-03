@@ -41,3 +41,11 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 ## License notice cleanup (2026-10-26)
 
 - The license-history notes were removed from README.md and COMMERCIAL.md: the project is offered only under the Aegean Game License 1.1 (AGL-1.1), with commercial use under ACL-1.0.
+
+### ADR-004: Beam endpoints get SVG terminus markers; portal transits stay unbridged
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: Dead-end beams rendered as blunt-cut dashes with no terminus, while portal jumps correctly emit separate SVG segments per ADR-002. A mobile-HUD overflow report from headless Edge screenshots turned out to be a minimum-window crop artifact: a true-390px iframe probe shows no overflow (body scrollW equals viewport, both HUD buttons visible) before and after, so no HUD change ships.
+- **Decision**: Append one SVG circle per beam-path end in `renderBeams` (bright dot on lit receivers, softer dot on dead ends, path color per source), skipping paths that end on a portal cell so the transit gap is never bridged; stash the lit set on the session (`litKeys`) instead of changing the engine. Lift locked-episode legibility tokens only (chamber card opacity 0.62 to 0.85, saturate 0.35 to 0.6; episode grid 0.55 to 0.8), keeping lock semantics and footers.
+- **Consequences**: No engine, contract, or test change; 50/50 tests and 5/5 AIKit gates still pass. Forced-colors maps markers to Highlight; no new animation is added, so reduced-motion behavior is unchanged. Before/after pairs: first-light, double-down, wormhole (terminus dots; no portal dots), chambers (locked legibility), victory/howto regressions, true-390 probe (no overflow either side).
+
