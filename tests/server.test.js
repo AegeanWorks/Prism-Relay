@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { browserCommand, launchBrowser, looksLikePrismRelay, safePath } from "../scripts/serve.mjs";
+import { browserCommand, launchBrowser, looksLikePrismRelay, resolvePort, safePath } from "../scripts/serve.mjs";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 
@@ -28,6 +28,14 @@ test("refuses a sibling directory whose name shares the project prefix", () => {
 
 test("refuses malformed URI escaping instead of crashing", () => {
   assert.equal(safePath("/%E0%A4%A"), null);
+});
+
+test("resolves the serve port and falls back on missing or invalid values", () => {
+  assert.equal(resolvePort(["node", "serve.mjs"]), 4173);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port", "8000"]), 8000);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port"]), 4173);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port", "abc"]), 4173);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port", "70000"]), 4173);
 });
 
 test("opens the game with the platform browser command", () => {
