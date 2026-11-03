@@ -49,3 +49,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Append one SVG circle per beam-path end in `renderBeams` (bright dot on lit receivers, softer dot on dead ends, path color per source), skipping paths that end on a portal cell so the transit gap is never bridged; stash the lit set on the session (`litKeys`) instead of changing the engine. Lift locked-episode legibility tokens only (chamber card opacity 0.62 to 0.85, saturate 0.35 to 0.6; episode grid 0.55 to 0.8), keeping lock semantics and footers.
 - **Consequences**: No engine, contract, or test change; 50/50 tests and 5/5 AIKit gates still pass. Forced-colors maps markers to Highlight; no new animation is added, so reduced-motion behavior is unchanged. Before/after pairs: first-light, double-down, wormhole (terminus dots; no portal dots), chambers (locked legibility), victory/howto regressions, true-390 probe (no overflow either side).
 
+### ADR-005: Episode IV Confluence teaches only combo-mechanics with embedded solutions plus solver proof
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: Three episodes end at Crossing with portals taught in isolation; new chambers must be more game without a new simulation, and every level must ship solvable with its par equal to the true minimum.
+- **Decision**: Add five chambers (14 Detour M1 splitter-to-portal par 4; 15 Overpass M2 prism-fan-to-portal par 5; 16 Relay Chain M3 portal-mirror-portal series par 6; 17 Crosscurrent M1+M2 par 9; 18 The Confluence M1+M2+M3 par 13) as DATA in `src/game/levels.js` with frozen rows plus an embedded `solution` vector; keep `engine.js` and `solver.js` unchanged (all combos use mirror/splitter/prism/portal primitives, solver cap stays 20, new max 15 rotatables). Tests assert solver minimum equals par, embedded solution completes, and double-trace `lit` equality for portal determinism; rank thresholds rescale proportionally for 54 stars (Operator 8, Weaver 19, Architect 32, Lumen 44, Master 54).
+- **Consequences**: Solver proof for all 18 levels runs ~1.4s in `npm test` (finale 2^15 traces); gameplay cost unchanged (single `traceBeams` per move). Saves stay additive (`progress.v1`, sequential-unlock repair appends Confluence after Crossing). Counts move 13/39 to 18/54 across `index.html`, README, and all three test files.
+
+### ADR-006: Polish pass stays token-only with no new UI handles
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: New episode needs a visual pass on every screen without drifting the AIKit UI contract or breaking coarse-pointer, forced-colors, and reduced-motion guarantees.
+- **Decision**: Change only `src/theme.css` tokens (stronger `--shadow-glow`, brighter line tokens) and value-level `src/styles.css` rules (beam halo opacity 0.42 to 0.55 with 8px glow, core width 0.062 to 0.075, complete-frame glow reuse); add no `data-ui/panel/cue` handles so `npm run ui:snapshot` baseline is byte-identical.
+- **Consequences**: `npm test` 50/50 and snapshot unchanged; screenshots (title, chambers with Episode IV, detour gameplay) prove the pass. Larger combined chambers (Crosscurrent 21x7, Confluence 11x23) render within the existing board grid; no layout change ships.
+

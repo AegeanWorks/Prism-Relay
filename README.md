@@ -48,12 +48,13 @@ Moves are counted per rotation. Each chamber advertises a par, the shortest poss
 | I — Ignition | 01–06 | Mirrors and fixed prisms | Learn the relay, then close a six-chamber vault |
 | II — Refraction | 07–10 | Rotatable splitters | Fork the signal and keep every branch alive |
 | III — Crossing | 11–13 | Paired teleport portals | Fold space and finish the longest circuit |
+| IV — Confluence | 14–18 | Combined relays | Forks, fans and chained gates in one circuit |
 
-Every episode ends with a larger, harder finale. Par rises from 1 move in First Light to 13 moves in The Long Way Home.
+Every episode ends with a larger, harder finale. Par rises from 1 move in First Light to 13 moves in The Long Way Home and The Confluence.
 
 ### Operator Profile and Audio
 
-The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 39 stars.
+The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars.
 
 Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M.
 
@@ -85,7 +86,7 @@ prism-relay/
 ├── src/
 │   ├── game/
 │   │   ├── engine.js          <- parser, beam tracer, splitters, portals, sessions
-│   │   ├── levels.js          <- three episodes and thirteen frozen ASCII chambers
+│   │   ├── levels.js          <- four episodes and eighteen frozen ASCII chambers
 │   │   └── solver.js          <- exhaustive minimum-move solver over all rotatables
 │   ├── ui/
 │   │   ├── app.js             <- screens, board renderer, profile, input, dialogs

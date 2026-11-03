@@ -173,12 +173,12 @@ test("normalizeCallsign handles empty and non-string values", () => {
 
 test("rank thresholds cover the full star range", () => {
   assert.equal(rankFor(0), "Cadet");
-  assert.equal(rankFor(5), "Cadet");
-  assert.equal(rankFor(6), "Operator");
-  assert.equal(rankFor(14), "Weaver");
-  assert.equal(rankFor(23), "Architect");
-  assert.equal(rankFor(32), "Lumen");
-  assert.equal(rankFor(39), "Relay Master");
+  assert.equal(rankFor(7), "Cadet");
+  assert.equal(rankFor(8), "Operator");
+  assert.equal(rankFor(19), "Weaver");
+  assert.equal(rankFor(32), "Architect");
+  assert.equal(rankFor(44), "Lumen");
+  assert.equal(rankFor(54), "Relay Master");
   assert.equal(rankFor(100), "Relay Master");
 });
 
@@ -196,8 +196,8 @@ test("statsFor derives completion, perfect runs, stars and moves", () => {
     perfect: 1,
     stars: 5,
     moves: 5,
-    totalLevels: 13,
-    totalStars: 39,
+    totalLevels: 18,
+    totalStars: 54,
   });
 });
 

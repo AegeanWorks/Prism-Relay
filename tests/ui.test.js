@@ -110,11 +110,11 @@ test("the manifest keeps a zero-dependency test and snapshot command", () => {
   assert.equal(manifest.devDependencies, undefined);
 });
 
-test("all thirteen chambers parse and use the episode taxonomy", () => {
-  assert.equal(LEVELS.length, 13);
-  assert.equal(TOTAL_LEVELS, 13);
-  assert.equal(TOTAL_STARS, 39);
-  assert.equal(EPISODES.length, 3);
+test("all eighteen chambers parse and use the episode taxonomy", () => {
+  assert.equal(LEVELS.length, 18);
+  assert.equal(TOTAL_LEVELS, 18);
+  assert.equal(TOTAL_STARS, 54);
+  assert.equal(EPISODES.length, 4);
   for (const level of LEVELS) {
     const board = parseLevel(level);
     assert.ok(board.width >= 7, `${level.id} has room for the board`);
@@ -125,6 +125,8 @@ test("all thirteen chambers parse and use the episode taxonomy", () => {
   assert.equal(EPISODES[0].levels.length, 6);
   assert.equal(EPISODES[1].levels.length, 4);
   assert.equal(EPISODES[2].levels.length, 3);
+  assert.equal(EPISODES[3].levels.length, 5);
+  assert.equal(EPISODES[3].id, "confluence");
 });
 
 test("the UI inventory scanner recognizes the three marker kinds", () => {

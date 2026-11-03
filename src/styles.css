@@ -810,7 +810,7 @@ dd {
 
 .board-frame.is-complete {
   border-color: var(--success);
-  box-shadow: var(--shadow-panel), 0 0 54px var(--beam-cyan-soft), 0 0 0 1px var(--success) inset;
+  box-shadow: var(--shadow-panel), var(--shadow-glow), 0 0 54px var(--beam-cyan-soft), 0 0 0 1px var(--success) inset;
 }
 
 .board {
@@ -844,8 +844,8 @@ dd {
 }
 
 .beam--halo {
-  filter: drop-shadow(0 0 6px var(--beam-cyan));
-  opacity: 0.42;
+  filter: drop-shadow(0 0 8px var(--beam-cyan));
+  opacity: 0.55;
   stroke-width: 0.34;
 }
 
@@ -876,7 +876,7 @@ dd {
   animation: beam-flow 1.35s linear infinite;
   stroke: var(--beam-white);
   stroke-dasharray: 0.12 0.52;
-  stroke-width: 0.062;
+  stroke-width: 0.075;
 }
 
 .beam-end {

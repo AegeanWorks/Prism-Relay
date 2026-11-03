@@ -142,31 +142,48 @@ test("stars award three at par, two within two moves, else one", () => {
 });
 
 test("every shipped level is rectangular, unique and solvable at its par", () => {
-  assert.equal(LEVELS.length, 13);
-  assert.equal(TOTAL_LEVELS, 13);
-  assert.equal(TOTAL_STARS, 39);
-  assert.equal(EPISODES.length, 3);
+  assert.equal(LEVELS.length, 18);
+  assert.equal(TOTAL_LEVELS, 18);
+  assert.equal(TOTAL_STARS, 54);
+  assert.equal(EPISODES.length, 4);
   assert.equal(new Set(LEVELS.map((entry) => entry.id)).size, LEVELS.length);
   for (const entry of LEVELS) {
     const board = parseLevel(entry);
     assert.ok(board.rotatables.length > 0, `${entry.id} has a move`);
+    assert.ok(board.rotatables.length <= 20, `${entry.id} fits the solver cap`);
     const solution = solveLevel(entry);
     assert.ok(solution, `${entry.id} is solvable`);
     assert.equal(solution.moves, entry.par, `${entry.id} par is the shortest solution`);
     const trace = applySolution(entry, solution.orientations);
     assert.equal(trace.complete, true, `${entry.id} solution completes`);
+    if (entry.solution) {
+      assert.equal(entry.solution.length, board.rotatables.length, `${entry.id} embedded solution covers every rotatable`);
+      const embedded = applySolution(entry, [...entry.solution]);
+      assert.equal(embedded.complete, true, `${entry.id} embedded solution completes`);
+    }
+    const twice = [traceBeams(parseLevel(entry)), traceBeams(parseLevel(entry))];
+    assert.deepEqual([...twice[0].lit].sort(), [...twice[1].lit].sort(), `${entry.id} traces deterministically`);
   }
   assert.ok(EPISODES[1].levels.some((entry) => parseLevel(entry).splitters.length > 0));
   assert.ok(EPISODES[2].levels.every((entry) => parseLevel(entry).portals.length >= 2));
   assert.ok(EPISODES[2].levels.at(-1).par > EPISODES[1].levels.at(-1).par);
+  assert.equal(EPISODES[3].id, "confluence");
+  assert.equal(EPISODES[3].levels.length, 5);
+  assert.ok(EPISODES[3].levels.every((entry) => parseLevel(entry).portals.length >= 2));
+  const pars = EPISODES[3].levels.map((entry) => entry.par);
+  assert.deepEqual(pars, [...pars].sort((a, b) => a - b), "confluence pars climb without cliffs");
 });
 
 test("episode helpers resolve levels and their order", () => {
   assert.equal(episodeForLevel("double-down").id, "refraction");
   assert.equal(levelsForEpisode("crossing").length, 3);
+  assert.equal(levelsForEpisode("confluence").length, 5);
   assert.equal(levelsForEpisode("missing").length, 0);
   assert.equal(nextLevel("the-vault").id, "double-down");
-  assert.equal(nextLevel("long-way-home"), null);
+  assert.equal(nextLevel("long-way-home").id, "detour");
+  assert.equal(nextLevel("the-confluence"), null);
+  assert.equal(episodeForLevel("detour").id, "confluence");
+  assert.equal(episodeForLevel("the-confluence").id, "confluence");
   assert.equal(episodeForLevel("missing"), null);
 });
 
