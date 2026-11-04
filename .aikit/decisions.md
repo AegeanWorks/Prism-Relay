@@ -63,3 +63,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Change only `src/theme.css` tokens (stronger `--shadow-glow`, brighter line tokens) and value-level `src/styles.css` rules (beam halo opacity 0.42 to 0.55 with 8px glow, core width 0.062 to 0.075, complete-frame glow reuse); add no `data-ui/panel/cue` handles so `npm run ui:snapshot` baseline is byte-identical.
 - **Consequences**: `npm test` 50/50 and snapshot unchanged; screenshots (title, chambers with Episode IV, detour gameplay) prove the pass. Larger combined chambers (Crosscurrent 21x7, Confluence 11x23) render within the existing board grid; no layout change ships.
 
+### ADR-007: Static server refuses dotfile and dot-directory paths
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: `safePath` confined reads to the project root but still served `.git/HEAD`, `.aikit/reforge.json`, and any dotfile, leaking repo metadata through the game server. Reproduced with `safePath('/.git/HEAD')` returning a path instead of null.
+- **Decision**: Reject any request whose relative path contains a segment starting with `.` before the containment check; add a failing-first `server.test.js` case for `.git`, `.aikit`, `.gitignore`, nested dotfiles, and encoded `%2Egit`.
+- **Consequences**: Game files (`index.html`, `src/**`, assets) serve unchanged; dot paths return 403. No engine, level, or contract change.
+

@@ -30,6 +30,14 @@ test("refuses malformed URI escaping instead of crashing", () => {
   assert.equal(safePath("/%E0%A4%A"), null);
 });
 
+test("refuses dotfile and dot-directory paths inside the project root", () => {
+  assert.equal(safePath("/.git/HEAD"), null);
+  assert.equal(safePath("/.aikit/reforge.json"), null);
+  assert.equal(safePath("/.gitignore"), null);
+  assert.equal(safePath("/src/.hidden"), null);
+  assert.equal(safePath("/%2Egit/HEAD"), null);
+});
+
 test("resolves the serve port and falls back on missing or invalid values", () => {
   assert.equal(resolvePort(["node", "serve.mjs"]), 4173);
   assert.equal(resolvePort(["node", "serve.mjs", "--port", "8000"]), 8000);
