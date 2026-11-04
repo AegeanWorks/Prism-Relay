@@ -96,6 +96,7 @@ prism-relay/
 │   └── theme.css              <- the only file with raw color and font values
 └── tests/
     ├── engine.test.js         <- physics, splitters, portals, sessions, pars
+    ├── audio.test.js          <- toggles, cues, music no-op without AudioContext
     ├── progress.test.js       <- saves, profile, rank, unlocks, audio settings
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
     └── ui.test.js             <- screen, control and manifest contract
