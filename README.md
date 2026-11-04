@@ -6,7 +6,7 @@
 <!-- aegean:media:end -->
 
 
-A neon light-routing puzzle game: rotate mirrors and splitters, split beams through prisms, fold space through portals, and charge every receiver across three episodes.
+A neon light-routing puzzle game: rotate mirrors and splitters, split beams through prisms, fold space through portals, and charge every receiver across four episodes.
 
 ## 30-Second Cold-Start Quick Reference
 

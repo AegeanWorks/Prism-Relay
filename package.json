@@ -4,7 +4,7 @@
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "type": "module",
-  "description": "A neon laser-mirror puzzle game: rotate mirrors and splitters, fold beams through portals, and recharge the grid across three episodes.",
+  "description": "A neon laser-mirror puzzle game: rotate mirrors and splitters, fold beams through portals, and recharge the grid across four episodes.",
   "scripts": {
     "start": "node scripts/serve.mjs --open",
     "test": "node --test tests",
