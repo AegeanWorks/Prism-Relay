@@ -107,6 +107,14 @@ test("paired portals carry a beam across the grid in the same direction", () => 
   assert.equal(trace.paths.length, 2);
 });
 
+test("converging emitters keep independent portal continuations", () => {
+  const board = parseLevel(level([">1T", ">.1"]));
+  const trace = traceBeams(board);
+  assert.equal(trace.complete, true);
+  assert.equal(trace.litCount, 1);
+  assert.equal(trace.paths.length, 4);
+});
+
 test("portal pairs must have exactly two endpoints", () => {
   assert.throws(() => parseLevel(level([">1.T"])), /exactly two portals/);
   assert.throws(() => parseLevel(level([">1.1.1T"])), /exactly two portals/);
@@ -160,6 +168,9 @@ test("every shipped level is rectangular, unique and solvable at its par", () =>
       assert.equal(entry.solution.length, board.rotatables.length, `${entry.id} embedded solution covers every rotatable`);
       const embedded = applySolution(entry, [...entry.solution]);
       assert.equal(embedded.complete, true, `${entry.id} embedded solution completes`);
+      const initial = board.rotatables.map((piece) => piece.orientation);
+      const embeddedMoves = entry.solution.filter((orientation, index) => orientation !== initial[index]).length;
+      assert.equal(embeddedMoves, entry.par, `${entry.id} embedded solution is optimal`);
     }
     const twice = [traceBeams(parseLevel(entry)), traceBeams(parseLevel(entry))];
     assert.deepEqual([...twice[0].lit].sort(), [...twice[1].lit].sort(), `${entry.id} traces deterministically`);

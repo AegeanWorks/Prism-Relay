@@ -117,6 +117,16 @@ test("recordResult does not replace a better result with a worse one", () => {
   assert.deepEqual(progress.best["split-decision"], { moves: 3, stars: 3 });
 });
 
+test("recordResult rejects invalid results without clobbering the best", () => {
+  let progress = recordResult(loadProgress(fakeStorage()), "first-light", 2, 3, null);
+  progress = recordResult(progress, "first-light", -1, 3, null);
+  progress = recordResult(progress, "first-light", 2, 99, null);
+  progress = recordResult(progress, "ghost-level", 1, 3, null);
+  progress = recordResult(progress, "first-light", 9, 1, "ghost-level");
+  assert.deepEqual(progress.best["first-light"], { moves: 2, stars: 3 });
+  assert.equal(isUnlocked(progress, "ghost-level"), false);
+});
+
 test("a completed first episode unlocks the first chamber of the next episode", () => {
   const best = {};
   for (const id of [

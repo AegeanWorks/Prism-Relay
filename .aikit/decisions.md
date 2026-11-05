@@ -70,3 +70,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Reject any request whose relative path contains a segment starting with `.` before the containment check; add a failing-first `server.test.js` case for `.git`, `.aikit`, `.gitignore`, nested dotfiles, and encoded `%2Egit`.
 - **Consequences**: Game files (`index.html`, `src/**`, assets) serve unchanged; dot paths return 403. No engine, level, or contract change.
 
+### ADR-008: Relay verify wave 2 source-scoped beams, strict results, and fast preview
+- **Date**: 2026-11-06
+- **Status**: Accepted
+- **Context**: The last-3-push window (dotfile refuse, audio coverage, episode-count sync on top of Episode IV) left four gaps: `traceBeams` shared one `visited` set across emitters so converging portal beams lost a path segment (`>1T` over `>.1` traced 3 paths, not 4); `resolvePort` ignored `--port=8000`; `recordResult` accepted negative moves, out-of-range stars, and unknown levels (an invalid write could drop the stored best on the next normalize); `previewVictory` brute-forced `solveLevel` even when the level ships an embedded optimal solution (2^15 traces for the finale).
+- **Decision**: Scope `visited` and portal-exit keys by emitter `source`; accept `--port=` alongside `--port` with the same 1-65535 fallback; validate `recordResult` inputs and unknown unlocks before writing; prefer the embedded `solution` with `moves = par` in `previewVictory` and fall back to the solver only when no embedded vector matches. Pin with failing-first tests for 4-path portal convergence, `--port=` forms, invalid-result preservation, and embedded-moves-equals-par.
+- **Consequences**: `npm test` 56/56 and `npm run ui:snapshot` unchanged (no new handles). Multi-emitter renders keep per-source colors past shared portals; invalid saves can no longer clobber bests; screenshot previews stay instant on large chambers.
+

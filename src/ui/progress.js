@@ -118,10 +118,26 @@ function betterResult(previous, moves, stars) {
 
 export function recordResult(progress, levelId, moves, stars, nextLevelId = null) {
   const next = normalizeProgress(progress);
+  if (
+    typeof levelId !== "string" ||
+    !LEVELS.some((level) => level.id === levelId) ||
+    !Number.isInteger(moves) ||
+    moves < 0 ||
+    !Number.isInteger(stars) ||
+    stars < 1 ||
+    stars > 3
+  ) {
+    return next;
+  }
   if (betterResult(next.best[levelId], moves, stars)) {
     next.best[levelId] = { moves, stars };
   }
-  if (nextLevelId && !next.unlocked.includes(nextLevelId)) {
+  if (
+    typeof nextLevelId === "string" &&
+    nextLevelId.length > 0 &&
+    LEVELS.some((level) => level.id === nextLevelId) &&
+    !next.unlocked.includes(nextLevelId)
+  ) {
     next.unlocked.push(nextLevelId);
   }
   return normalizeProgress(next);

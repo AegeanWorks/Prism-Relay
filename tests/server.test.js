@@ -44,6 +44,9 @@ test("resolves the serve port and falls back on missing or invalid values", () =
   assert.equal(resolvePort(["node", "serve.mjs", "--port"]), 4173);
   assert.equal(resolvePort(["node", "serve.mjs", "--port", "abc"]), 4173);
   assert.equal(resolvePort(["node", "serve.mjs", "--port", "70000"]), 4173);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port=8000"]), 8000);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port=abc"]), 4173);
+  assert.equal(resolvePort(["node", "serve.mjs", "--port=70000"]), 4173);
 });
 
 test("opens the game with the platform browser command", () => {

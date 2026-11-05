@@ -1119,15 +1119,27 @@ function previewVictory() {
   if (!state.session) {
     startLevel(LEVELS[0].id, { preview: true, silent: true });
   }
-  const solution = solveLevel(state.level);
-  if (solution) {
-    state.session.board.rotatables.forEach((piece, index) => {
-      piece.orientation = solution.orientations[index];
+  const rotatables = state.session.board.rotatables;
+  const embedded = state.level.solution;
+  if (Array.isArray(embedded) && embedded.length === rotatables.length) {
+    rotatables.forEach((piece, index) => {
+      piece.orientation = embedded[index];
     });
-    state.session.moves = solution.moves;
+    state.session.moves = state.level.par;
     traceSession();
     state.completed = true;
     updateBoard();
+  } else {
+    const solution = solveLevel(state.level);
+    if (solution) {
+      state.session.board.rotatables.forEach((piece, index) => {
+        piece.orientation = solution.orientations[index];
+      });
+      state.session.moves = solution.moves;
+      traceSession();
+      state.completed = true;
+      updateBoard();
+    }
   }
   const episode = episodeForLevel(state.level.id);
   const next = nextLevel(state.level.id);

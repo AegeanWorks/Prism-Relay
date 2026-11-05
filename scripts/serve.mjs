@@ -6,15 +6,24 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 export function resolvePort(argv = process.argv, fallback = 4173) {
-  const portArg = argv.indexOf("--port");
-  if (portArg === -1) {
-    return fallback;
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--port") {
+      const port = Number(argv[index + 1]);
+      if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+        return fallback;
+      }
+      return port;
+    }
+    if (arg.startsWith("--port=")) {
+      const port = Number(arg.slice("--port=".length));
+      if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+        return fallback;
+      }
+      return port;
+    }
   }
-  const port = Number(argv[portArg + 1]);
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
-    return fallback;
-  }
-  return port;
+  return fallback;
 }
 const port = resolvePort(process.argv);
 const openBrowserOnStart = process.argv.includes("--open");
