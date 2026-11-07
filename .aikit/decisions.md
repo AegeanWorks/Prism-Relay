@@ -189,3 +189,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Add `MUSIC_LEVEL = 0.05`, `duckMusic(level = 0.014, hold = 1.0, restore = 1.8)` and a `musicLevel()` probe in `audio.js`. `duckMusic` cancels pending automation, ramps from the current value to 0.014 in 120ms, holds for 1s, then ramps back to 0.05 by 1.8s; it no-ops when there is no context, no music gain, or the pad is below half level. `playVictory` returns early when effects are disabled and otherwise ducks before the tones.
 - **Consequences**: The same played run reads 0.050 before victory, 0.014 at 150ms after the winning click, and 0.050 at 1.7s after the modal; the before run stayed at 0.050 at every sample. The music and effects toggles, start/stop paths and no-context behavior are unchanged. Audio only, no screenshot claim; `npm test` moves 106 to 107 with a duck no-context case.
 
+### ADR-025: Every navigation and dialog control plays the UI cue
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: With music disabled, a played probe found `openChambers` played the 440Hz UI tone while How to play, the dialog X, Back to title, brand home, profile back, pause and game back produced no tone. The same class of navigation action sounded inconsistent depending on the screen.
+- **Decision**: Add `audio.playUi()` to the silent handlers: How to play, modal close, back-to-title/brand-home, game back, profile back, the pause button and the Escape pause path. Keep the calls in click/key handlers rather than the modal-opening functions, so `?preview=howto` and `?preview=pause` screenshot loads stay silent.
+- **Consequences**: A played run with music off now logs `[440]` for How to play, dialog close, Episode index, Back, brand home, profile back, pause and game back; the before run logged `[]` for all except Episode index. No new audio asset, volume or save change; the no-context audio tests still pass, and `npm test` stays at 107 because the interaction is covered by the played probe.
+

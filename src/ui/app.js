@@ -1288,6 +1288,7 @@ function handleGlobalKeydown(event) {
   }
   if (event.key === "Escape") {
     event.preventDefault();
+    audio.playUi();
     openPauseModal();
   }
 }
@@ -1381,16 +1382,25 @@ function bindEvents() {
     });
   });
   document.querySelectorAll('[data-ui="open-howto"]').forEach((button) => {
-    button.addEventListener("click", openHowToModal);
+    button.addEventListener("click", () => {
+      audio.playUi();
+      openHowToModal();
+    });
   });
   document.querySelectorAll('[data-ui="open-profile"]').forEach((button) => {
     button.addEventListener("click", openProfile);
   });
   document.querySelectorAll('[data-ui="back-to-title"], [data-ui="brand-home"]').forEach((button) => {
-    button.addEventListener("click", () => showScreen("title"));
+    button.addEventListener("click", () => {
+      audio.playUi();
+      showScreen("title");
+    });
   });
   document.querySelectorAll('[data-ui="game-back"]').forEach((button) => {
-    button.addEventListener("click", () => showScreen("chambers"));
+    button.addEventListener("click", () => {
+      audio.playUi();
+      showScreen("chambers");
+    });
   });
   document.querySelectorAll('[data-ui="reset-level"], [data-ui="restart-level-side"]').forEach((button) => {
     button.addEventListener("click", resetCurrentLevel);
@@ -1407,9 +1417,13 @@ function bindEvents() {
     }
   });
   document.querySelectorAll('[data-ui="pause-game"]').forEach((button) => {
-    button.addEventListener("click", openPauseModal);
+    button.addEventListener("click", () => {
+      audio.playUi();
+      openPauseModal();
+    });
   });
   elements.profileBack?.addEventListener("click", () => {
+    audio.playUi();
     showScreen(state.profileReturn === "profile" ? "title" : state.profileReturn);
   });
   elements.profileForm?.addEventListener("submit", saveCallsign);
@@ -1424,7 +1438,10 @@ function bindEvents() {
     toggleEffects(event.target.checked);
   });
   elements.soundToggle?.addEventListener("click", toggleAllAudio);
-  elements.modalClose?.addEventListener("click", closeModal);
+  elements.modalClose?.addEventListener("click", () => {
+    audio.playUi();
+    closeModal();
+  });
   elements.modal.addEventListener("close", () => {
     state.modalOpen = false;
     state.modalKind = null;

@@ -125,6 +125,7 @@ prism-relay/
 - **Prisms are taught in place.** Chambers whose only special piece is a fixed prism show the pass-through and two-fork rule in the side panel; combo chambers keep the splitter and portal notes without adding a third.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.
+- **Audible navigation.** Every navigation arrow, topbar control and dialog open or close plays the same short UI tone; screenshot query modes stay silent because the calls live in click and key handlers.
 - **Last move stays marked.** The last rotated cell keeps a thin cyan outline until the next rotation or reset, while the 320ms rotation bump class clears itself.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.

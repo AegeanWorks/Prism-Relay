@@ -24,7 +24,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 14 | Game feel / last-move marker | done |
 | 15 | UI readability / endgame CTA | done |
 | 16 | Audio / victory music ducking | done |
-| 17 | Audio / menu interaction cue | next |
+| 17 | Audio / navigation cues | done |
+| 18 | Accessibility & responsive audit | next |
 
 ---
 
@@ -1235,6 +1236,75 @@ console errors. Report: `.review/cycles/cycle-16/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(audio): duck the music under the victory fanfare`.
+
+---
+
+## Cycle 17 - Audio: consistent navigation cues
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: with music disabled, a played probe found `openChambers` played the 440Hz UI tone while How
+to play, the dialog X, Back to title, brand home, profile back, pause and game back produced no tone.
+The same class of navigation action sounded different depending on the screen.
+
+Baseline: `.review/cycles/cycle-17/before-ui-cues-report.json` — all silent except
+`openChambers: [440]`.
+
+### ANALYZE
+
+- Survivor: add the existing `playUi` tone to the silent navigation and modal handlers. It reuses the
+  current cue and volume, so no mixing change is needed.
+- Survivor: keep the calls in click/key handlers, not in `openHowToModal`/`openPauseModal`, so
+  `?preview=howto` and `?preview=pause` screenshot modes stay silent.
+- Killed: a new click sound or louder tone. The UI cue already exists and is intentionally quiet.
+- Killed: a sound on native Escape dismissal of a dialog. It would double with action buttons and
+  cannot be scoped cleanly; the explicit X now sounds.
+- Killed: changing the sound toggle behavior. It already plays when enabling and is silent when
+  muting by design.
+
+### IMPLEMENT
+
+Files:
+- `src/ui/app.js`: `playUi()` added to How to play, modal close, back-to-title/brand-home, game back,
+  profile back, the pause button and the Escape pause path.
+- `README.md`, `.aikit/decisions.md` ADR-025.
+
+No engine, level, save, visual or inventory change.
+
+### PROOF
+
+Played run: headless Edge 157, 1440x900, seeded save with music off, page-level oscillator frequency
+recorder, each action followed by a 200ms read.
+
+| Action | Before | After |
+|---|---|---|
+| How to play | `[]` | `[440]` |
+| Dialog close | `[]` | `[440]` |
+| Episode index | `[440]` | `[440]` |
+| Back to title | `[]` | `[440]` |
+| Brand home | `[]` | `[440]` |
+| Profile back | `[]` | `[440]` |
+| Pause | `[]` | `[440]` |
+| Game back | `[]` | `[440]` |
+
+Reports: `.review/cycles/cycle-17/before-ui-cues-report.json` and `after-ui-cues-report.json`. Audio
+only; no screenshot claim.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-17/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 107 tests, 107 pass, 0 fail (interaction covered by the played probe).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(audio): give every navigation control the UI cue`.
+
 
 
 

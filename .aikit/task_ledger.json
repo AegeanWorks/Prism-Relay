@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-16-victory-duck",
+    "task_id": "cycle-17-ui-cues",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794093285.9830933,
+    "updated_at": 1794093854.776728,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794093307.6763585
+    "completed_at": 1794093878.802258
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-12-modal-actions",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Plan: pin modal actions below a scrolling content area so the primary button is reachable without scrolling on phones",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794088963.7676919,
-      "timestamp_str": "2026-11-08 01:02:43",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "At 390x844 the Field Manual dialog is 760px tall, its whole content scrolls, and the primary action sits at y=832 with a 876px bottom; the button is below the fold and the probe reports primaryVisible false. Desktop keeps it visible, so the how-to action only fails on phones.",
-        "benefits": "How-to, pause and victory actions stay in view while the body scrolls; the primary button is tappable immediately and the close button stays at the top. Desktop layout keeps the same content and actions.",
-        "risks": "contract: modal actions move outside .modal__content and the dialog becomes a flex column when open; dependency: none; concurrency: none; state: no save change; layout: content scrolls instead of the whole dialog, and small screens keep full-width buttons.",
-        "mitigation": "Structural UI test, 390x844 and 1440x900 before/after probes with modal/content/action rects, a real tap on the primary action, a content-scroll check that the actions stay fixed, and the 18-level regression."
-      },
-      "plan_digest": "fc8a06cfb9fcddcb797d02010f2b83b97ba377ab5d2c78783dfe9669f5eee384"
-    },
-    {
-      "task_id": "cycle-12-modal-actions",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/3] Implemented: modal actions moved outside the scrolling content, flex-column open dialog, content overflow, pinned action row with rule and solid glass, compact mobile padding, modal-structure test, README and ADR-020",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794089700.4201334,
-      "timestamp_str": "2026-11-08 01:15:00",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-12-modal-actions",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Verified: npm test 100/100; aikit check 5/5; 390x844 primary visible at y733-777, content scrolls 673/765, actions fixed after scroll, real tap returns to game; desktop content 658/658; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794089700.7001293,
-      "timestamp_str": "2026-11-08 01:15:00",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-12-modal-actions",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-12-modal-actions' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794089769.482804,
-      "timestamp_str": "2026-11-08 01:16:09",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-13-rank-progress",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794093307.6763616,
       "timestamp_str": "2026-11-08 02:15:07",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-17-ui-cues",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: play the soft UI cue on every navigation and modal control that is currently silent",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093403.4903781,
+      "timestamp_str": "2026-11-08 02:16:43",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "Some navigation actions play the 440Hz UI tone (Episode index, Enter, profile, reset) while How to play, the brand/back arrows, pause and the dialog X are silent. A played probe with music off will show zero tones for those controls, so the interface sounds inconsistent for the same class of action.",
+        "benefits": "Every screen transition and dialog open/close gives the same quiet confirmation, matching the existing action sound without new assets or volume changes.",
+        "risks": "contract: add playUi calls to six existing handlers; dependency: none; concurrency: none; state: none; audio only, no visual or save change; preview screenshot modes must stay silent because the calls sit in click/key handlers, not the modal functions.",
+        "mitigation": "Instrumented played probe for How to play, dialog close, Episode index, Back, brand home, pause and game back; before/after tone logs; a full 18-level run; and the no-context audio tests."
+      },
+      "plan_digest": "11fd0dc3c1583f99eec8ff25e26b0ff96bcd1dc00403c5aac94e76526dcd9b04"
+    },
+    {
+      "task_id": "cycle-17-ui-cues",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: playUi added to How to play, modal close, back/brand home, game back, profile back, pause button and Escape pause; preview modes stay silent; README and ADR-025",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093854.41229,
+      "timestamp_str": "2026-11-08 02:24:14",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-17-ui-cues",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 107/107; aikit check 5/5; music-off probe now logs [440] for howto, close, back, brand, profile back, pause and game back where before was silent; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093854.776728,
+      "timestamp_str": "2026-11-08 02:24:14",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-17-ui-cues",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-17-ui-cues' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794093878.8022597,
+      "timestamp_str": "2026-11-08 02:24:38",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]
