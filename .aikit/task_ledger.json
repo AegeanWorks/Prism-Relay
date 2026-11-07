@@ -1,73 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-15-endgame-cta",
+    "task_id": "cycle-16-victory-duck",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794092457.9929478,
+    "updated_at": 1794093285.9830933,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "impact_assessment": {
-      "why": "A played 54-star save still shows 'Enter the relay' and clicking it starts First Light; the label describes a first entry while the action is a replay, so the primary endgame action lies about what it does.",
-      "benefits": "The title action states the real endgame state: Enter the relay before 18/18, Replay the relay after; clicked behavior stays First Light after a full clear, so only the copy changes.",
-      "risks": "contract: adds a start-label span and a pure CTA helper; dependency: none; concurrency: none; state: reads statsFor completion, no save change; layout: the label length grows by three characters but stays within the primary button.",
-      "mitigation": "Pure relayCtaLabel cases at 0/17/18/19 with a zero-total guard, a DOM label-span contract, a played 18/18 before/after title pair, a click check that still opens First Light, and the 18-level regression."
-    },
-    "completed_at": 1794092489.0063426
+    "completed_at": 1794093307.6763585
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-11-prism-note",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Plan: teach the fixed prism in the in-game mechanic note on prism-only chambers",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794088252.1798744,
-      "timestamp_str": "2026-11-08 00:50:52",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "Split Decision and The Vault contain fixed prisms, but their mechanic note is hidden; only the legend says 'Prism splits light' and the detailed three-way behavior lives in the how-to modal. Splitter and portal chambers get an in-game note, so the first prism mechanic is the only Episode I mechanic without one.",
-        "benefits": "Players meet the prism's pass-through plus two perpendicular forks in the side panel on the chambers that introduce it, without lengthening the combo chambers that already show splitter and portal notes.",
-        "risks": "contract: mechanics copy moves into a pure module; dependency: none; concurrency: none; state: derived from parsed board pieces; layout: one extra note box on prism-only levels, which still fits 1440x900.",
-        "mitigation": "Pure mechanicNotes cases for prism-only, splitter, portal, combo and plain boards, before/after side-panel screenshots on Split Decision, a played 2-click clear, a combo-level unchanged check and the 18-level regression."
-      },
-      "plan_digest": "20db5b2bbbb872f5b58ec8ab7bfe7716ffcc66bc6a0dbfdb1d8c711baf594244"
-    },
-    {
-      "task_id": "cycle-11-prism-note",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/3] Implemented: pure mechanicNotes module with six tests, app renders the notes, prism-only chambers get the pass-through/fan lesson, combo and splitter/portal copy unchanged, README and ADR-019",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794088637.5150182,
-      "timestamp_str": "2026-11-08 00:57:17",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-11-prism-note",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Verified: npm test 99/99; aikit check 5/5; Split Decision and The Vault show the Prism note, Double Down/Wormhole/Confluence unchanged, Split Decision clears in 2 clicks/3 stars; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794088637.8546195,
-      "timestamp_str": "2026-11-08 00:57:17",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-11-prism-note",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-11-prism-note' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794088665.1519964,
-      "timestamp_str": "2026-11-08 00:57:45",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-12-modal-actions",
       "phase": "in_progress",
@@ -266,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794092489.0063448,
       "timestamp_str": "2026-11-08 02:01:29",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-16-victory-duck",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: duck the ambient music under the victory fanfare and restore it afterward",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794092586.0356162,
+      "timestamp_str": "2026-11-08 02:03:06",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "The victory fanfare plays four tones at gains 0.035-0.04 while the ambient pad stays at 0.05; the fanfare competes with the music it should sit above. The audio module has musicGain state but no duck path and no test coverage for one.",
+        "benefits": "The fanfare gets headroom without changing the music/effects toggles or adding assets; the pad returns to its normal level after 1.4s, and the duck is a no-op when music or effects are off.",
+        "risks": "contract: playVictory gains a guard and duck call, audio exports a musicLevel probe; dependency: none; concurrency: one gain automation per victory, canceled/rescheduled at the current value; state: no save change; audio only.",
+        "mitigation": "A no-context duck/musicLevel test, real Double Down play with a gain-node probe that tracks the 0.05 pad before victory and reads it at 200ms/1.7s after, and the 18-level regression."
+      },
+      "plan_digest": "5087075603a4ebd3375ca1cdafa68cf85f4f113e17f62e370c8b9a32b5b54b23"
+    },
+    {
+      "task_id": "cycle-16-victory-duck",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: MUSIC_LEVEL constant, duckMusic with 0.014/1s hold/1.8s restore and low-pad guard, musicLevel probe, playVictory SFX guard plus duck, no-context test, README and ADR-024",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093285.6342993,
+      "timestamp_str": "2026-11-08 02:14:45",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-16-victory-duck",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 107/107; aikit check 5/5; played Double Down pad 0.05 before victory, 0.014 at 150ms, 0.0199 after modal, 0.05 by 1.7s; before run stayed 0.05 at every sample; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093285.9830933,
+      "timestamp_str": "2026-11-08 02:14:45",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-16-victory-duck",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-16-victory-duck' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794093307.6763616,
+      "timestamp_str": "2026-11-08 02:15:07",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

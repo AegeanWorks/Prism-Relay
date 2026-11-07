@@ -56,7 +56,7 @@ Every episode ends with a larger, harder finale. Par rises from 1 move in First 
 
 The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars. The profile also names the next rank and how many stars remain to reach it.
 
-Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M. A rotation also reports its consequence: a two-note charge when a receiver lights, and a gate sweep when a beam's portal transit changes.
+Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M. A rotation also reports its consequence: a two-note charge when a receiver lights, and a gate sweep when a beam's portal transit changes. Music ducks under the victory fanfare and returns afterward.
 
 Progress is stored in `localStorage` under `prism-relay.progress.v1`. A missing or corrupt record resets safely; an older record without profile, music or episode fields keeps its stars and gains defaults. Sequential unlocks are repaired from completed chambers, so a save that finished Ignition opens Refraction automatically. A record from a newer save version is left untouched rather than overwritten. When a write is refused, the profile and the victory card say that changes are not being stored instead of claiming success.
 
@@ -124,6 +124,7 @@ prism-relay/
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
 - **Prisms are taught in place.** Chambers whose only special piece is a fixed prism show the pass-through and two-fork rule in the side panel; combo chambers keep the splitter and portal notes without adding a third.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
+- **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.
 - **Last move stays marked.** The last rotated cell keeps a thin cyan outline until the next rotation or reset, while the 320ms rotation bump class clears itself.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.

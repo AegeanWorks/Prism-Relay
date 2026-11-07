@@ -1,9 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  duckMusic,
   isEnabled,
   isMusicEnabled,
   isMusicPlaying,
+  musicLevel,
   playCharge,
   playError,
   playPortal,
@@ -54,10 +56,17 @@ test("music start/stop is a safe no-op without an AudioContext", () => {
   setMusicEnabled(true);
   startMusic();
   assert.equal(isMusicPlaying(), false);
+  assert.equal(musicLevel(), null);
   assert.doesNotThrow(() => stopMusic());
   assert.equal(isMusicPlaying(), false);
   setMusicEnabled(false);
   startMusic();
   assert.equal(isMusicPlaying(), false);
   setMusicEnabled(true);
+});
+
+test("duckMusic is a safe no-op without an AudioContext", () => {
+  assert.equal(musicLevel(), null);
+  assert.doesNotThrow(() => duckMusic());
+  assert.doesNotThrow(() => duckMusic(0.01, 0.5));
 });

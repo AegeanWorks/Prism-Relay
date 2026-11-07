@@ -23,7 +23,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 13 | Progression UX / rank progress | done |
 | 14 | Game feel / last-move marker | done |
 | 15 | UI readability / endgame CTA | done |
-| 16 | Audio / victory music ducking | next |
+| 16 | Audio / victory music ducking | done |
+| 17 | Audio / menu interaction cue | next |
 
 ---
 
@@ -1165,6 +1166,76 @@ console errors. Report: `.review/cycles/cycle-15/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(ui): label the title action as a replay after a full clear`.
+
+---
+
+## Cycle 16 - Audio: duck the ambient music under the victory fanfare
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: the ambient pad sits at gain 0.05 while the four victory tones play at 0.035-0.04, so the
+fanfare competes with the music instead of sitting above it. A played Double Down run with a gain-node
+probe tracked the 0.05 pad and measured 0.050 at 150ms after the winning click, at the modal, and
+1.7s later; there was no duck path in the audio module.
+
+Baseline: `.review/cycles/cycle-16/before-duck-report.json`.
+
+### ANALYZE
+
+- Survivor: duck the existing music gain for a short window when the fanfare starts, then restore it.
+  This adds no asset and keeps the music/effects toggles independent.
+- Survivor: hold the lowered gain for about a second so the fanfare is clear before the pad returns;
+  an immediate ramp back is too shallow to notice.
+- Survivor: no-op when effects are off (silent fanfare), when music is off, or while the pad is still
+  fading in below half level.
+- Survivor: expose `musicLevel()` for the played probe and a no-context test.
+- Killed: stopping the music on victory. It would be abrupt and would need a manual restart.
+- Killed: lowering the fanfare gains instead. The fanfare should stay prominent; the pad is the bed.
+- Killed: changing the saved audio preferences. The duck is runtime-only.
+
+### IMPLEMENT
+
+Files:
+- `src/ui/audio.js`: `MUSIC_LEVEL = 0.05`; `duckMusic(level = 0.014, hold = 1.0, restore = 1.8)`;
+  `musicLevel()`; `playVictory` returns early when effects are off, otherwise ducks before the tones.
+  The pad fade-in uses `MUSIC_LEVEL`.
+- `tests/audio.test.js`: duck/musicLevel no-context case.
+- `README.md`, `.aikit/decisions.md` ADR-024.
+
+No engine, level, save or UI-inventory change.
+
+### PROOF
+
+Played run: headless Edge 157, 1440x900, Double Down with music on, one real click to unlock audio and
+rotate, 3s for the pad to reach 0.05, then three more real clicks to win. A page-level wrapper records
+every `createGain`; the probe pins the node at 0.05 before victory and samples it afterward.
+
+| Sample | Before | After |
+|---|---|---|
+| Before victory | 0.0500 | 0.0500 |
+| 150ms after winning click | 0.0500 | 0.0140 |
+| 200ms after modal | 0.0500 | 0.0199 |
+| 1.7s after modal | 0.0500 | 0.0500 |
+
+The after run starts at 0.0447 immediately, reaches 0.0140 at 150ms, and is back to 0.0500 by the
+1.7s sample. Reports: `.review/cycles/cycle-16/before-duck-report.json` and
+`after-duck-report.json`. Audio only; no screenshot claim.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-16/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 107 tests, 107 pass, 0 fail (was 106; +1 duck no-context case).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/audio.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(audio): duck the music under the victory fanfare`.
+
 
 
 

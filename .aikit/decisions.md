@@ -182,3 +182,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Add `relayCtaLabel(completed, total)` in `src/ui/hints.js`; it returns "Replay the relay" only when `total > 0` and every chamber is complete, otherwise "Enter the relay". Wrap the title button text in `#start-label` and update it from `updateTitleStats` on every title render. The click behavior is unchanged: it still starts the first uncleared chamber, which is First Light after a full clear.
 - **Consequences**: A played 18/18 save with 54 stars and 111 best moves reads "Replay the relay"; clicking it starts First Light at 0 moves. A save at 0 or 17 cleared chambers still reads "Enter the relay". No engine, level, save or UI-inventory change; `npm test` moves 103 to 106 with three CTA-label cases and one label-span contract.
 
+### ADR-024: The victory fanfare ducks the ambient music
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The ambient pad sits at gain 0.05 while the four victory tones play at 0.035-0.04, so the fanfare competed with the music it should sit above. A played Double Down run with a gain-node probe tracked the 0.05 pad and found it unchanged at 150ms, at the modal, and 1.7s after victory.
+- **Decision**: Add `MUSIC_LEVEL = 0.05`, `duckMusic(level = 0.014, hold = 1.0, restore = 1.8)` and a `musicLevel()` probe in `audio.js`. `duckMusic` cancels pending automation, ramps from the current value to 0.014 in 120ms, holds for 1s, then ramps back to 0.05 by 1.8s; it no-ops when there is no context, no music gain, or the pad is below half level. `playVictory` returns early when effects are disabled and otherwise ducks before the tones.
+- **Consequences**: The same played run reads 0.050 before victory, 0.014 at 150ms after the winning click, and 0.050 at 1.7s after the modal; the before run stayed at 0.050 at every sample. The music and effects toggles, start/stop paths and no-context behavior are unchanged. Audio only, no screenshot claim; `npm test` moves 106 to 107 with a duck no-context case.
+
