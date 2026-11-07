@@ -126,3 +126,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Add `saveStatusMessage(saved, success)` in `src/ui/hints.js` and use the actual `saveProgress` return in the callsign, sigil and audio-toggle handlers; a refused write shows "Changes are not being stored." `finishLevel` records `saveFailed: !saved` in the victory result and `openVictoryModal` appends "Progress for this run is not being stored." to the card. Normal success copy is unchanged, and preview results omit the flag.
 - **Consequences**: With a version-2 save, the callsign and sigil actions now report "Changes are not being stored." while the stored record stays FUTURE/helix, and the First Light victory card carries the warning. A normal version-1 save still reports "Callsign saved." and stores NOVA. No save-format, engine, level or inventory change; `npm test` moves 85 to 87 with two status-copy cases.
 
+### ADR-016: The moves HUD shows live star pace
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The HUD showed moves against par but not the rating those moves would earn. A player who crossed par by one learned that three stars were gone only from the victory card, even though `starsFor` already defines the boundaries at par and par+2.
+- **Decision**: Add `#hud-stars` (`data-cue="hud-stars"`) to the moves metric. On every `updateGameView`, render `starsMarkup(starsFor(moves, par))` and set the accessible label "On pace for N stars". Reuse the existing `.stars`/`.star` styling with a compact `.metric .metric__stars` row. The value is derived from the session, so reset and start restore three stars automatically.
+- **Consequences**: On Double Down (par 4) the HUD shows three earned stars at moves 0, two at moves 5, and one at moves 8, with matching aria labels. The row adds no horizontal overflow at 320, 360, 390 or 414px widths (metrics height 62-63px). The UI inventory gains one cue marker; no engine, level, save or interaction change. `npm test` stays at 87 with the HUD-cue contract assertion added to the existing UI test.
+

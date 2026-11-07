@@ -72,6 +72,7 @@ const elements = {
   gameSubtitle: document.getElementById("game-subtitle"),
   hudMoves: document.getElementById("hud-moves"),
   hudPar: document.getElementById("hud-par"),
+  hudStars: document.getElementById("hud-stars"),
   hudRelays: document.getElementById("hud-relays"),
   gameHint: document.getElementById("game-hint"),
   gameMechanic: document.getElementById("game-mechanic"),
@@ -603,6 +604,14 @@ function updateGameView() {
   elements.gameSubtitle.textContent = state.level.subtitle;
   elements.hudMoves.textContent = String(state.session.moves);
   elements.hudPar.textContent = String(state.level.par);
+  const pace = starsFor(state.session.moves, state.level.par);
+  if (elements.hudStars) {
+    elements.hudStars.innerHTML = starsMarkup(pace);
+    elements.hudStars.setAttribute(
+      "aria-label",
+      `On pace for ${pace} star${pace === 1 ? "" : "s"}`,
+    );
+  }
   elements.hudRelays.textContent = `${lit}/${total}`;
   elements.gameHint.textContent = board.portals.length
     ? "Portals preserve direction. Follow the paired number."

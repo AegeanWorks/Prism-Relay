@@ -15,7 +15,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 05 | Progression and saves / future-version preservation | done |
 | 06 | Game feel / post-victory flow | done |
 | 07 | Progression UX / honest save status | done |
-| 08 | Game feel / charge feedback | next |
+| 08 | Game feel / live star pace | done |
+| 09 | Accessibility / reduced motion and forced colors | next |
 
 ---
 
@@ -583,6 +584,82 @@ console errors. Report: `.review/cycles/cycle-07/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(ux): report refused saves instead of claiming success`.
+
+---
+
+## Cycle 08 - Game feel: live star pace in the moves HUD
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect/opportunity: the HUD showed moves and par but not the rating those moves would earn. A player
+one move over par saw only "MOVES 5 / 4 par" and learned that three stars were gone from the victory
+card. `starsFor` already defines the boundaries at par and par+2, but nothing in the live HUD used it.
+
+Baseline: `.review/cycles/cycle-08/before-star-pace-report.json` (no `#hud-stars`, `earnedStars: 0`
+at moves 0/5/8) and `before-moves-5.png`.
+
+### ANALYZE
+
+- Survivor: derive the pace from `starsFor(moves, par)` on every HUD update. It is the same rule the
+  victory card uses, so the preview cannot disagree with the result.
+- Survivor: reuse the existing gold star markup and add a compact row to the moves metric. No new
+  panel, modal or interaction.
+- Survivor: expose the pace in the aria label for screen readers while keeping the glyphs aria-hidden.
+- Killed: a separate "pace" card in the side panel. It would be off-screen on mobile and larger than
+  the information warrants.
+- Killed: a new scoring function. `starsFor` is already tested at par, par+1, par+2 and beyond.
+- Killed: changing the victory card to show pace. It already shows the final stars; this cycle is the
+  live preview only.
+
+### IMPLEMENT
+
+Failing-first: `tests/ui.test.js` asserted `data-cue="hud-stars"` before the marker existed.
+
+Files:
+- `index.html`: `#hud-stars` (`data-cue="hud-stars"`, initial aria "On pace for 3 stars") in the moves
+  metric.
+- `src/ui/app.js`: `hudStars` element lookup; `updateGameView` renders `starsMarkup(starsFor(...))` and
+  sets the aria label.
+- `src/styles.css`: compact `.metric .metric__stars` row.
+- `tests/ui.test.js`: HUD-cue contract assertion.
+- `README.md`, `.aikit/decisions.md` ADR-016.
+
+No engine, level, save or interaction change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, fresh storage, `/?level=double-down`, five real splitter
+clicks, then three more.
+
+| Pair | Before | After |
+|---|---|---|
+| Moves 0 | `.review/cycles/cycle-08/before-moves-0.png` | `.review/cycles/cycle-08/after-moves-0.png` |
+| Moves 5 (par 4) | `.review/cycles/cycle-08/before-moves-5.png` | `.review/cycles/cycle-08/after-moves-5.png` |
+| Moves 8 (par 4) | `.review/cycles/cycle-08/before-moves-8.png` | `.review/cycles/cycle-08/after-moves-8.png` |
+
+After: moves 0 -> 3 earned stars / "On pace for 3 stars"; moves 5 -> 2 / "On pace for 2 stars";
+moves 8 -> 1 / "On pace for 1 star". The board orientation and receiver count are identical across
+each pair. Report: `.review/cycles/cycle-08/after-star-pace-report.json`.
+
+Mobile: at 320/360/390/414px the HUD stays within the viewport (`scrollWidth == innerWidth`), height
+62-63px, three stars and the aria label present. Screenshot:
+`.review/cycles/cycle-08/after-mobile-390x844.png`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-08/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 87 tests, 87 pass, 0 fail (same count; the HUD contract assertion joined the UI test).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `cue: hud-stars`; no other inventory drift.
+- `node --check src/ui/app.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(ui): show live star pace in the moves HUD`.
+
 
 
 

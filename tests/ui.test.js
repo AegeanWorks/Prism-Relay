@@ -80,6 +80,7 @@ test("panels and cues expose screenshot and accessibility markers", () => {
   assert.match(html, /data-panel="profile-episodes"/);
   assert.match(html, /data-cue="status-line"/);
   assert.match(html, /data-cue="game-chapter"/);
+  assert.match(html, /data-cue="hud-stars"/);
   assert.match(html, /data-cue="profile-rank"/);
   assert.match(html, /aria-live|data-cue/);
 });

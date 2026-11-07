@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-07-save-status",
+    "task_id": "cycle-08-star-pace",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794085202.1917045,
+    "updated_at": 1794085951.0537517,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794085218.8543222
+    "completed_at": 1794085966.359633
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-03-portal-legibility",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Plan: make live portal pairs legible with four pair colors, a live glow ring, and a pure live-pair helper driven by the beam trace",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794080884.777936,
-      "timestamp_str": "2026-11-07 22:48:04",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "Portal gates are rendered at identical full brightness whether or not the beam uses them, and pairs 1, 2 and 4 share the same lime. In Long Way Home pair 1 carries the beam and pair 3 is idle, yet all four gates glow the same; in The Confluence active pair 2 is indistinguishable from idle pairs 1 and 4.",
-        "benefits": "Players can read which pair is live at a glance, and four gate pairs get four colors (lime, cyan, magenta, gold) instead of two; this supports the multi-pair Episode IV chambers without changing rules or levels.",
-        "risks": "contract: adds visual state classes only, no UI handles; dependency: none; concurrency: one class toggle per portal on the existing trace; state: no save change; color contrast and forced-colors must stay legible.",
-        "mitigation": "Pure livePortalPairs() unit-tested against Long Way Home, The Confluence and an unused-pair level; class toggling reuses the existing traceBeams paths; screenshots from identical state and viewport; forced-colors rule and reduced-motion animation; a real click on The Confluence proves the live set moves."
-      },
-      "plan_digest": "d8219f6dd8b47224dadac9252075a3f46553836ec9da4c34b6444e72f42fd4b8"
-    },
-    {
-      "task_id": "cycle-03-portal-legibility",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/4] Implemented: pure livePortalPairs helper with three tests, is-live toggle plus beam-passing aria label, four pair colors, idle dim/live ring, forced-colors and reduced-motion handling, README and ADR-011",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794081508.2434657,
-      "timestamp_str": "2026-11-07 22:58:28",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-03-portal-legibility",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Verified: npm test 76/76; aikit check 5/5; Long Way Home and Confluence before/after pairs show live vs idle gates; real splitter flip moves live set [2,2] to [1,1,2,2] and the 13-move clear lights all four pairs; 18/18 levels still at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794081508.6347594,
-      "timestamp_str": "2026-11-07 22:58:28",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-03-portal-legibility",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-03-portal-legibility' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794081519.5387433,
-      "timestamp_str": "2026-11-07 22:58:39",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-04-par-visibility",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794085218.8543246,
       "timestamp_str": "2026-11-08 00:00:18",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-08-star-pace",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: show the current star pace in the moves HUD so every move tells the player whether three stars are still reachable",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794085353.7111626,
+      "timestamp_str": "2026-11-08 00:02:33",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "The HUD shows moves against par but not the rating those moves would earn. A player who overshoots par by one only discovers the lost 3-star run on the victory card; starsFor already defines the boundary at par and par+2.",
+        "benefits": "Three small stars next to the move count dim as the run crosses par and par+2, giving immediate, glanceable feedback without a new panel or modal; the aria label states the pace for screen readers.",
+        "risks": "contract: adds a data-cue marker and reuses starsMarkup; dependency: none; concurrency: none; state: derived from moves and par, reset with the session; layout: the moves metric grows by about 30px and may wrap at 320px.",
+        "mitigation": "Static HUD marker test, starsFor boundaries already covered, before/after HUD screenshots at moves 0/5/8 on Double Down, a real five- and eight-click run reading the star count and aria label, mobile width checks, and the 18-level regression."
+      },
+      "plan_digest": "5a921919fd619bd2aee2da95a0c6f51200b8d2882e6fce6760c3e7ae4f2e1915"
+    },
+    {
+      "task_id": "cycle-08-star-pace",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: hud-stars cue in the moves metric, starsMarkup(starsFor()) and pace aria label in updateGameView, compact star row styling, HUD contract assertion, README and ADR-016",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794085950.456517,
+      "timestamp_str": "2026-11-08 00:12:30",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-08-star-pace",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 87/87; aikit check 5/5; Double Down moves 0/5/8 show 3/2/1 earned stars and matching aria labels; no horizontal overflow at 320-414px; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794085951.0537517,
+      "timestamp_str": "2026-11-08 00:12:31",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-08-star-pace",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-08-star-pace' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794085966.3596349,
+      "timestamp_str": "2026-11-08 00:12:46",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

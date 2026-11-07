@@ -774,6 +774,13 @@ dd {
   font-style: normal;
 }
 
+.metric .metric__stars {
+  margin-left: var(--space-1);
+  gap: 1px;
+  letter-spacing: 0;
+  font-size: var(--size-2xs);
+}
+
 .game-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 312px;
