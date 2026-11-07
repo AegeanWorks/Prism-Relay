@@ -35,6 +35,7 @@ import {
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "./cues.js";
 import { parHint, postVictoryAction, saveStatusMessage } from "./hints.js";
+import { mechanicNotes } from "./mechanics.js";
 import { starLabel, starsMarkup } from "./stars.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -618,22 +619,10 @@ function updateGameView() {
   elements.legendSplitter.hidden = board.splitters.length === 0;
   elements.legendPortal.hidden = board.portals.length === 0;
 
-  const mechanics = [];
-  if (board.splitters.length > 0) {
-    mechanics.push([
-      "Splitter",
-      "The main beam passes through; a copy forks to the bright side.",
-    ]);
-  }
-  if (board.portals.length > 0) {
-    mechanics.push([
-      "Portal",
-      "Enter one gate, leave the twin in the same direction. Numbers pair the gates.",
-    ]);
-  }
+  const mechanics = mechanicNotes(board);
   elements.gameMechanic.hidden = mechanics.length === 0;
   elements.gameMechanic.innerHTML = mechanics
-    .map(([name, text]) => `<strong>${name}</strong>${text}`)
+    .map(({ name, text }) => `<strong>${name}</strong>${text}`)
     .join("<br>");
   elements.boardFrame.classList.toggle("is-complete", state.session.complete);
 

@@ -94,6 +94,7 @@ prism-relay/
 │   │   ├── cues.js            <- state-derived charge and portal sound decisions
 │   │   ├── hints.js           <- pluralized par, save-status and post-victory copy
 │   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
+│   │   ├── mechanics.js       <- per-chamber splitter, portal and prism notes
 │   │   ├── progress.js        <- versioned saves, profile, rank and statistics
 │   │   └── stars.js           <- filled and outlined star markup and labels
 │   ├── styles.css             <- component styling using theme tokens
@@ -106,6 +107,7 @@ prism-relay/
     ├── layout.test.js         <- viewport fit arithmetic for tall chambers
     ├── cues.test.js           <- charge and portal transit cue decisions
     ├── hints.test.js          <- par, save-status and post-victory copy
+    ├── mechanics.test.js      <- per-chamber mechanic notes
     ├── stars.test.js          <- filled and outlined star markup
     └── ui.test.js             <- screen, control and manifest contract
 ```
@@ -120,6 +122,7 @@ prism-relay/
 - **Accessible by construction.** The board is a group of real buttons with labels, roving keyboard focus, a live status line and a native `<dialog>`; buttons and topbar controls meet 3:1 boundaries and 44px coarse-pointer targets, while dense board cells stay at least 24px.
 - **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
+- **Prisms are taught in place.** Chambers whose only special piece is a fixed prism show the pass-through and two-fork rule in the side panel; combo chambers keep the splitter and portal notes without adding a third.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.

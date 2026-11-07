@@ -18,7 +18,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 08 | Game feel / live star pace | done |
 | 09 | Accessibility / star state without color | done |
 | 10 | Game feel / receiver charge impact | done |
-| 11 | Levels / prism onboarding | next |
+| 11 | Levels / prism onboarding | done |
+| 12 | Game feel / last-move marker | next |
 
 ---
 
@@ -809,6 +810,80 @@ console errors. Report: `.review/cycles/cycle-10/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(game): burst a ring when a receiver first charges`.
+
+---
+
+## Cycle 11 - Levels: teach the fixed prism in place
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: Split Decision and The Vault contain fixed prisms, but `#game-mechanic` was hidden on both
+(`hidden: true`, empty text). Splitter chambers show "SPLITTER ..." and portal chambers show
+"SPLITTER / PORTAL", so the first Episode I mechanic was the only one without an in-place note; the
+detailed pass-through plus two-fork behavior lived only in the how-to dialog and the one-line legend.
+
+Baseline: `.review/cycles/cycle-11/before-prism-note-report.json` and
+`before-split-decision-side.png` (no note box).
+
+### ANALYZE
+
+- Survivor: show a detailed Prism note exactly on chambers whose special piece is the prism (prisms
+  present, no splitters, no portals). That covers Split Decision, Mirror Maze, Crossfire and The
+  Vault, which introduce the mechanic.
+- Survivor: keep the existing splitter and portal copy and order untouched; extract the whole note
+  list into a pure helper so the condition and strings are testable.
+- Survivor: leave combo chambers alone. The Confluence already shows two notes; a third would grow
+  an already tall side panel.
+- Killed: adding a new panel or modal. The existing mechanic-note slot is exactly for this.
+- Killed: changing the legend only. It already says "Prism splits light"; the missing part is the
+  three-way behavior.
+- Killed: changing level data or prism behavior. The engine is correct; only the lesson was absent.
+
+### IMPLEMENT
+
+Failing-first: `tests/mechanics.test.js` could not import `src/ui/mechanics.js`.
+
+Files:
+- `src/ui/mechanics.js` (new): `mechanicNotes(board)` returns splitter and portal notes and a
+  prism-only note when the board has prisms and neither of the other special pieces.
+- `src/ui/app.js`: `updateGameView` renders `mechanicNotes(board)` instead of inline strings.
+- `tests/mechanics.test.js` (new, 6 cases): prism-only, The Vault, splitter, portal, combo, plain.
+- `README.md`, `.aikit/decisions.md` ADR-019.
+
+No engine, level, save or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, `/?level=split-decision`, fresh storage, initial state.
+
+| Pair | Before | After |
+|---|---|---|
+| Side panel | `.review/cycles/cycle-11/before-split-decision-side.png` | `.review/cycles/cycle-11/after-split-decision-side.png` |
+| Whole game | `.review/cycles/cycle-11/before-split-decision.png` | `.review/cycles/cycle-11/after-split-decision.png` |
+
+Before: no note box. After: a pink "PRISM — The prism passes the beam through and splits copies to
+both perpendicular sides." box above the legend, with the same objective, legend, par hint and
+Restart button. The after report also shows The Vault with the Prism note, while Double Down,
+Wormhole and The Confluence keep exactly their previous note text.
+
+Played run: Split Decision solved with 2 real clicks, 2 moves, 2/2 receivers, 3 stars, 0 errors.
+Report: `.review/cycles/cycle-11/after-prism-note-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-11/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 99 tests, 99 pass, 0 fail (was 93; +6 mechanic-note cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js`, `src/ui/mechanics.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(levels): teach the prism in prism-only chambers`.
+
 
 
 
