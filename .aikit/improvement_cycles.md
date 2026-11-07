@@ -25,7 +25,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 15 | UI readability / endgame CTA | done |
 | 16 | Audio / victory music ducking | done |
 | 17 | Audio / navigation cues | done |
-| 18 | Accessibility & responsive audit | next |
+| 18 | Accessibility audit / forced-colors toggles | done |
+| 19 | Post-fix verification sweep | next |
 
 ---
 
@@ -1304,6 +1305,80 @@ console errors. Report: `.review/cycles/cycle-17/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(audio): give every navigation control the UI cue`.
+
+---
+
+## Cycle 18 - Accessibility audit: forced-colors audio toggles
+
+**Date**: 2026-11-08
+
+### FIND
+
+The audit passed three areas and failed one:
+
+- Keyboard-only: Tab to Enter, Enter starts First Light, Tab reaches reset/pause/mirror, Space clears
+  the chamber at 1 move/3 stars, Enter advances to Split Decision. Pass.
+- Reduced motion: beam, screen and mirror durations 0.001s; star pace present. Pass.
+- 320x568: every screen has `scrollWidth == innerWidth`; how-to and victory primaries are visible at
+  471-515 and 367-411. Pass.
+- Forced colors: the profile's Music/Effects switches render as empty pills. The custom toggle hides
+  the real checkbox at opacity 0 and draws a 16px knob; forced colors maps the knob and pill to the
+  same Canvas, so checked and unchecked look identical.
+
+Baseline: `.review/cycles/cycle-18/audit-report.json` and `before-profile-forced.png`.
+
+### ANALYZE
+
+- Survivor: in forced-colors mode, hide the custom toggle and show the native checkbox at 24x24. The
+  system control already provides the check mark, focus ring and state semantics.
+- Survivor: force the selector with `input[type="checkbox"]`. A first attempt with `.toggle-row
+  input` was overridden by the later base rule (same specificity, later source), leaving opacity 0
+  and width 1px; the attribute selector wins regardless of order.
+- Killed: author `background: Highlight` on the knob. Forced colors remapped it to Canvas in the
+  probe, leaving the knob white on white.
+- Killed: `forced-color-adjust: none`. It would opt out of the user's contrast preferences.
+- Killed: adding a text ON/OFF label only in forced colors. The native checkbox is simpler and more
+  familiar.
+- No other audit item was reproducible; no changes shipped for keyboard, motion or 320px.
+
+### IMPLEMENT
+
+Files:
+- `src/styles.css`: forced-colors block shows `.toggle-row input[type="checkbox"]` at 24x24 with
+  opacity 1 and hides `.toggle`.
+- `README.md`, `.aikit/decisions.md` ADR-026.
+
+No engine, level, save or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, forced-colors emulation, default profile (Music and Effects
+on); the before build is a detached worktree at b32c079, the after build is the working tree.
+
+| Pair | Before | After |
+|---|---|---|
+| Profile audio toggles, forced colors | `.review/cycles/cycle-18/before-profile-forced.png` | `.review/cycles/cycle-18/after-profile-forced.png` |
+
+Before: two empty outlined pills. After: two native checked boxes. Clicking Music off leaves its box
+visibly unchecked while Effects stays checked: `after-profile-forced-music-off.png`. Probe values:
+before `inputOpacity: 0`, `inputWidth: 1px`, `toggleDisplay: block`, white knob; after
+`inputOpacity: 1`, `inputWidth: 24px`, `toggleDisplay: none`. Reports:
+`.review/cycles/cycle-18/before-toggle-report.json` and `after-toggle-report.json`. Audit captures
+for game/how-to/victory are also stored as `audit-forced-*.png`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-18/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 107 tests, 107 pass, 0 fail (CSS fix; played probe is the reproducer).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- Playwright audit: keyboard pass, reduced-motion pass, 320px pass, forced-colors defect fixed.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(a11y): show native audio checkboxes in forced colors`.
+
 
 
 

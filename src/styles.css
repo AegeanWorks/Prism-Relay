@@ -1855,6 +1855,17 @@ dd {
   .cell.is-last-moved {
     outline-color: Highlight;
   }
+
+  .toggle-row input[type="checkbox"] {
+    position: static;
+    width: 24px;
+    height: 24px;
+    opacity: 1;
+  }
+
+  .toggle {
+    display: none;
+  }
 }
 
 .title-stats dd em {
