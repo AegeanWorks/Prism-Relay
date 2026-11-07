@@ -19,7 +19,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 09 | Accessibility / star state without color | done |
 | 10 | Game feel / receiver charge impact | done |
 | 11 | Levels / prism onboarding | done |
-| 12 | Game feel / last-move marker | next |
+| 12 | UI readability / mobile modal actions | done |
+| 13 | Progression UX / rank progress | next |
 
 ---
 
@@ -883,6 +884,83 @@ console errors. Report: `.review/cycles/cycle-11/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(levels): teach the prism in prism-only chambers`.
+
+---
+
+## Cycle 12 - UI readability: pinned modal actions on phones
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: at 390x844 the Field Manual dialog is 760px tall and the whole dialog scrolls. The action row
+sat at y=832 with a 876px bottom, so the primary "Return to chamber" button was below the viewport;
+the probe reported `primaryVisible: false` and the button could not be tapped without discovering
+scrolling. Desktop kept the button visible, so the failure was phone-specific.
+
+Baseline: `.review/cycles/cycle-12/before-modal-report.json` and `before-howto-390x844.png`.
+
+### ANALYZE
+
+- Survivor: separate the scrolling body from a fixed action row. The actions are the exit from every
+  modal, so they should not depend on scroll position.
+- Survivor: keep the close button anchored at the top; it remains an immediate escape for anyone who
+  does not want an action.
+- Survivor: pin the row with a solid glass background and a rule so scrolled text does not bleed
+  through; a gradient fade still let the last line show through.
+- Survivor: reduce desktop action padding by one step so the keyboard help line is not clipped by the
+  new fixed row.
+- Killed: making the whole dialog shorter or moving the how-to content into a new panel. The content
+  is useful and the existing modal is the right container.
+- Killed: hiding content on mobile. The field manual is exactly what a new player needs.
+- Killed: changing the modal action labels or behavior. Only the scroll owner changed.
+
+### IMPLEMENT
+
+Failing-first: `tests/ui.test.js` asserted the actions are a direct sibling after the content; the
+old markup kept them inside `.modal__content`.
+
+Files:
+- `index.html`: `.modal__actions` moved out of `.modal__content` as a direct child of the dialog.
+- `src/styles.css`: `.modal[open]` flex column; content `min-height: 0; overflow-y: auto` with no
+  bottom padding; actions fixed with solid glass background, top rule and compact padding; mobile
+  padding adjusted.
+- `tests/ui.test.js`: modal-structure contract.
+- `README.md`, `.aikit/decisions.md` ADR-020.
+
+No engine, level, save or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, `/?level=wormhole&preview=howto`, 390x844 mobile/touch and 1440x900
+desktop.
+
+| Pair | Before | After |
+|---|---|---|
+| Field Manual 390x844 | `.review/cycles/cycle-12/before-howto-390x844.png` | `.review/cycles/cycle-12/after-howto-390x844.png` |
+| Field Manual 1440x900 | `.review/cycles/cycle-12/before-howto-1440x900.png` | `.review/cycles/cycle-12/after-howto-1440x900.png` |
+
+Before mobile: actions y=832, bottom 876, `primaryVisible: false`. After mobile: content 673px client
+vs 765px scroll, actions fixed at y=716-801, primary at y=733-777, `primaryVisible: true`. Scrolling
+the content to the bottom leaves the action rect unchanged. A real tap on the primary closes the
+dialog and leaves `screen-game` open. After desktop: content 658/658 (no hidden line), actions 91px,
+primary visible. Scrolled mobile screenshot:
+`.review/cycles/cycle-12/after-howto-390x844-scrolled.png`. Reports:
+`.review/cycles/cycle-12/before-modal-report.json` and `after-modal-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-12/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 100 tests, 100 pass, 0 fail (was 99; +1 modal-structure contract).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check` not needed for HTML/CSS; the UI contract test parses the document.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(ui): pin modal actions above the phone fold`.
+
 
 
 

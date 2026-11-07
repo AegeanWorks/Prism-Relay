@@ -128,6 +128,7 @@ prism-relay/
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.
 - **No solved dead ends.** If the victory dialog is dismissed, the game foot keeps a Next chamber action (or Episode index on the finale) until the player restarts or leaves.
+- **Pinned modal actions.** Modal bodies scroll while the action row stays fixed at the bottom, so a phone can tap Return, Next or Replay without scrolling; a one-pixel rule separates the scrolling body from the actions.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow

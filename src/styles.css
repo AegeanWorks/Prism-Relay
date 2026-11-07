@@ -1363,12 +1363,17 @@ dd {
   width: min(92vw, 560px);
   max-height: min(90vh, 760px);
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
   background: var(--glass-strong);
   box-shadow: var(--shadow-deep), var(--shadow-glow);
   color: var(--paper);
+}
+
+.modal[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 .modal::backdrop {
@@ -1386,7 +1391,9 @@ dd {
 
 .modal__content {
   position: relative;
-  padding: var(--space-6);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-6) 0;
 }
 
 .modal__close {
@@ -1420,9 +1427,12 @@ dd {
 
 .modal__actions {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  border-top: 1px solid var(--line);
+  background: var(--glass-strong);
 }
 
 .modal__fine {
@@ -1747,7 +1757,11 @@ dd {
   }
 
   .modal__content {
-    padding: var(--space-5);
+    padding: var(--space-5) var(--space-5) 0;
+  }
+
+  .modal__actions {
+    padding: var(--space-4) var(--space-5) var(--space-5);
   }
 
   .modal__actions .button {

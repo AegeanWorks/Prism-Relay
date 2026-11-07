@@ -102,6 +102,13 @@ test("the compact HUD keeps the par target visible", () => {
   assert.doesNotMatch(css, /\.metric em\s*\{[^}]*display:\s*none/);
 });
 
+test("modal actions live outside the scrolling content", () => {
+  assert.match(
+    html,
+    /id="modal-body"[^>]*><\/p>\s*<\/div>\s*<div class="modal__actions">/,
+  );
+});
+
 test("the shell has no inline styles or third-party asset dependencies", () => {
   assert.equal(/<style[ >]/i.test(html), false);
   assert.equal(/style="/i.test(html), false);

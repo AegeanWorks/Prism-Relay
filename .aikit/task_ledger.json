@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-11-prism-note",
+    "task_id": "cycle-12-modal-actions",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794088637.8546195,
+    "updated_at": 1794089700.7001293,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794088665.1519942
+    "completed_at": 1794089769.4828022
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-07-save-status",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Plan: make save feedback honest in the profile and the victory modal when a write is refused or fails",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794084603.3225963,
-      "timestamp_str": "2026-11-07 23:50:03",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "With a read-only future-version save, editing the callsign reports 'Callsign saved.' and choosing a sigil reports 'Sigil updated.' although localStorage still holds FUTURE/helix; clearing First Light shows a normal 3-star victory with no warning while the result is not stored. The player is told progress happened when it did not.",
-        "benefits": "Every profile write and every chamber clear reports its real persistence state; a future-version or quota-restricted save can no longer masquerade as stored progress, while normal v1 writes keep their success messages.",
-        "risks": "contract: victory result gains saveFailed and the modal body gains a warning; dependency: none; concurrency: none; state: no save-format change, still read-only for newer versions; layout: one extra fine-print line in the victory modal.",
-        "mitigation": "Pure saveStatusMessage(saved, success) cases, source-verified profile status after real Save and sigil clicks, a future-save victory warning, a normal-v1 success control, and the 18-level regression."
-      },
-      "plan_digest": "5ec4bd6301eea5e31a58b59a63224b795ecc1714751b78322d4e0102661c0867"
-    },
-    {
-      "task_id": "cycle-07-save-status",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/3] Implemented: pure saveStatusMessage helper with two tests, real save-result checks in profile callsign/sigil/audio toggles, saveFailed victory result plus modal warning, README and ADR-015",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794085201.9054947,
-      "timestamp_str": "2026-11-08 00:00:01",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-07-save-status",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Verified: npm test 87/87; aikit check 5/5; read-only future save now reports 'Changes are not being stored.' for callsign/sigil and adds the victory warning while stored FUTURE/helix survive; normal v1 save still reports success and stores NOVA; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794085202.1917045,
-      "timestamp_str": "2026-11-08 00:00:02",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-07-save-status",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-07-save-status' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794085218.8543246,
-      "timestamp_str": "2026-11-08 00:00:18",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-08-star-pace",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794088665.1519964,
       "timestamp_str": "2026-11-08 00:57:45",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-12-modal-actions",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: pin modal actions below a scrolling content area so the primary button is reachable without scrolling on phones",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794088963.7676919,
+      "timestamp_str": "2026-11-08 01:02:43",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "At 390x844 the Field Manual dialog is 760px tall, its whole content scrolls, and the primary action sits at y=832 with a 876px bottom; the button is below the fold and the probe reports primaryVisible false. Desktop keeps it visible, so the how-to action only fails on phones.",
+        "benefits": "How-to, pause and victory actions stay in view while the body scrolls; the primary button is tappable immediately and the close button stays at the top. Desktop layout keeps the same content and actions.",
+        "risks": "contract: modal actions move outside .modal__content and the dialog becomes a flex column when open; dependency: none; concurrency: none; state: no save change; layout: content scrolls instead of the whole dialog, and small screens keep full-width buttons.",
+        "mitigation": "Structural UI test, 390x844 and 1440x900 before/after probes with modal/content/action rects, a real tap on the primary action, a content-scroll check that the actions stay fixed, and the 18-level regression."
+      },
+      "plan_digest": "fc8a06cfb9fcddcb797d02010f2b83b97ba377ab5d2c78783dfe9669f5eee384"
+    },
+    {
+      "task_id": "cycle-12-modal-actions",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: modal actions moved outside the scrolling content, flex-column open dialog, content overflow, pinned action row with rule and solid glass, compact mobile padding, modal-structure test, README and ADR-020",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794089700.4201334,
+      "timestamp_str": "2026-11-08 01:15:00",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-12-modal-actions",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 100/100; aikit check 5/5; 390x844 primary visible at y733-777, content scrolls 673/765, actions fixed after scroll, real tap returns to game; desktop content 658/658; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794089700.7001293,
+      "timestamp_str": "2026-11-08 01:15:00",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-12-modal-actions",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-12-modal-actions' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794089769.482804,
+      "timestamp_str": "2026-11-08 01:16:09",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]
