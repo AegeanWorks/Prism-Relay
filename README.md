@@ -90,6 +90,7 @@ prism-relay/
 │   │   └── solver.js          <- exhaustive minimum-move solver over all rotatables
 │   ├── ui/
 │   │   ├── app.js             <- screens, board renderer, profile, input, dialogs
+│   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
 │   │   ├── audio.js           <- generated effects and ambient music, no assets
 │   │   └── progress.js        <- versioned saves, profile, rank and statistics
 │   ├── styles.css             <- component styling using theme tokens
@@ -99,6 +100,7 @@ prism-relay/
     ├── audio.test.js          <- toggles, cues, music no-op without AudioContext
     ├── progress.test.js       <- saves, profile, rank, unlocks, audio settings
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
+    ├── layout.test.js         <- viewport fit arithmetic for tall chambers
     └── ui.test.js             <- screen, control and manifest contract
 ```
 
@@ -110,6 +112,7 @@ prism-relay/
 - **Additive saves.** The save version stays at 1. New fields are optional and normalized, while sequential unlocks are reconstructed from completed chambers instead of discarding old progress.
 - **Token-only styling.** Raw colors and font values live in `src/theme.css`; every other line uses CSS custom properties.
 - **Accessible by construction.** The board is a group of real buttons with labels, roving keyboard focus, a live status line and a native `<dialog>`; buttons and topbar controls meet 3:1 boundaries and 44px coarse-pointer targets, while dense board cells stay at least 24px.
+- **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow

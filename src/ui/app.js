@@ -17,6 +17,11 @@ import {
 import { solveLevel } from "../game/solver.js";
 import * as audio from "./audio.js";
 import {
+  BOARD_MAX_WIDTH,
+  BOARD_MIN_WIDTH,
+  fitBoardWidth,
+} from "./layout.js";
+import {
   isUnlocked,
   loadProgress,
   rankFor,
@@ -37,6 +42,8 @@ const storage = (() => {
   }
 })();
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const compactLayout = window.matchMedia("(max-width: 900px)");
+const BOARD_FOOT_RESERVE = 56;
 
 const screens = new Map(
   ["title", "chambers", "game", "profile"].map((name) => [
@@ -147,6 +154,9 @@ function showScreen(name) {
   }
   if (name !== "game") {
     closeModal();
+  }
+  if (name === "game") {
+    fitBoardToViewport();
   }
   window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
 }
@@ -370,6 +380,61 @@ function renderBoard() {
   }
   state.rotatableCells.forEach((cell, index) => {
     cell.element.tabIndex = index === 0 ? 0 : -1;
+  });
+  fitBoardToViewport();
+}
+
+function fitBoardToViewport() {
+  if (
+    !elements.boardFrame ||
+    !state.session ||
+    elements.boardFrame.offsetParent === null
+  ) {
+    return;
+  }
+  const frame = elements.boardFrame;
+  frame.style.width = "";
+  if (compactLayout.matches) {
+    return;
+  }
+  const styles = getComputedStyle(frame);
+  const frameX =
+    (Number.parseFloat(styles.paddingLeft) || 0) +
+    (Number.parseFloat(styles.paddingRight) || 0) +
+    (Number.parseFloat(styles.borderLeftWidth) || 0) +
+    (Number.parseFloat(styles.borderRightWidth) || 0);
+  const frameY =
+    (Number.parseFloat(styles.paddingTop) || 0) +
+    (Number.parseFloat(styles.paddingBottom) || 0) +
+    (Number.parseFloat(styles.borderTopWidth) || 0) +
+    (Number.parseFloat(styles.borderBottomWidth) || 0);
+  const rect = frame.getBoundingClientRect();
+  let documentTop = 0;
+  for (let node = frame; node; node = node.offsetParent) {
+    documentTop += node.offsetTop;
+  }
+  const availableHeight = window.innerHeight - documentTop - BOARD_FOOT_RESERVE;
+  const width = fitBoardWidth({
+    columns: state.session.board.width,
+    rows: state.session.board.height,
+    availableHeight,
+    paddingX: frameX,
+    paddingY: frameY,
+    minWidth: BOARD_MIN_WIDTH,
+    maxWidth: Math.min(BOARD_MAX_WIDTH, rect.width),
+  });
+  frame.style.width = `${width}px`;
+}
+
+let boardFitFrame = 0;
+
+function scheduleBoardFit() {
+  if (boardFitFrame) {
+    return;
+  }
+  boardFitFrame = requestAnimationFrame(() => {
+    boardFitFrame = 0;
+    fitBoardToViewport();
   });
 }
 
@@ -1246,6 +1311,7 @@ function bindEvents() {
     }
   });
   window.addEventListener("keydown", handleGlobalKeydown);
+  window.addEventListener("resize", scheduleBoardFit);
   window.addEventListener("pointerdown", unlockAudio, { once: true });
   window.addEventListener("keydown", unlockAudio, { once: true });
   document.addEventListener("visibilitychange", () => {
