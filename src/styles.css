@@ -1318,6 +1318,12 @@ dd {
   letter-spacing: 0.04em;
 }
 
+.game-foot__next {
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  font-size: var(--size-xs);
+}
+
 .footer {
   display: flex;
   width: min(100%, var(--shell-width));

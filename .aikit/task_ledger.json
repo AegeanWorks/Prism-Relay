@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-05-future-save",
+    "task_id": "cycle-06-post-victory",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794083161.474119,
+    "updated_at": 1794084295.5044818,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794083186.6893137
+    "completed_at": 1794084321.7839708
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-01-board-fit",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Plan: fit tall chambers to the desktop viewport with a pure, tested width calculation and a played Confluence run",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794076914.7442613,
-      "timestamp_str": "2026-11-07 21:41:54",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "The Confluence is an 11x23 board: at 1440x900 its frame renders 1297px tall (bottom 1484), so 45% of the relay is below the fold and the player cannot see both ends of a beam while rotating pieces.",
-        "benefits": "Every chamber fits the visible game area at desktop sizes; The Confluence drops from 1297px to about 330px wide and 650px tall, with 26px cells still above the dense-cell floor; the remaining width goes to whitespace instead of hidden tiles.",
-        "risks": "contract: board width is inline-styled, so resize and screen changes must recompute; dependency: none, pure arithmetic module; concurrency: none; state: no save change; mobile keeps horizontal fit and a 24px cell floor for coarse pointers.",
-        "mitigation": "Pure fitBoardWidth() unit-tested across tall/square/short cases, computed from measured frame top and CSS padding; apply after every renderBoard and on resize; verify 18 boards across 1440x900, 1280x720 and 390x844 with Playwright geometry, plus a full 13-move Confluence playthrough."
-      },
-      "plan_digest": "6eb3c00c5bee9c9629663bd2a5facb81469fdc8769cf000893cf6ab4ebe04a59"
-    },
-    {
-      "task_id": "cycle-01-board-fit",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/3] Implemented: pure fitBoardWidth module with six failing-first tests, desktop board fit on render/resize/screen return, README and ADR-009; no engine, level, save or UI-handle change",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794078727.7922637,
-      "timestamp_str": "2026-11-07 22:12:07",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-01-board-fit",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Verified: npm test 62/62; aikit check 5/5; 18/18 scripted browser runs at exact par and 3 stars, 0 console errors; The Confluence fits 1440x900 (334x657) and improves 1280x720 (304 wide, 57px board overflow); before/after pairs captured; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794078728.4650218,
-      "timestamp_str": "2026-11-07 22:12:08",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-01-board-fit",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-01-board-fit' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794078751.2718747,
-      "timestamp_str": "2026-11-07 22:12:31",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-02-audio-feedback",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794083186.6893156,
       "timestamp_str": "2026-11-07 23:26:26",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-06-post-victory",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/4] Plan: keep a Next chamber or Episode index action in the game foot after a victory dialog is dismissed, so a solved board is never a dead end",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794083542.2617404,
+      "timestamp_str": "2026-11-07 23:32:22",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "After First Light clears, pressing Escape or the dialog close button leaves the game screen with 1 move, 1/1 receivers and status 'Relay closed. Chamber complete.'; the next chamber is unlocked but there is no forward button, and clicking the completed board does nothing. The only route to Split Decision is back through the episode index.",
+        "benefits": "A dismissed victory dialog stays recoverable: the foot shows Next chamber, or Episode index on the finale, until the player restarts or leaves. Dismissal keeps its escape hatch and the modal flow is unchanged.",
+        "risks": "contract: adds one data-ui handle and a foot control; dependency: none; concurrency: none; state: action derives from the existing victory result, hidden on start/reset; layout: the foot grows around 40px on desktop and stacks on mobile.",
+        "mitigation": "Pure postVictoryAction() cases, required-control coverage, updateGameView hiding on start/reset, before/after screenshots after Escape from the same First Light state, a played dismiss-then-Next run that lands on Split Decision, and the 18-level regression."
+      },
+      "plan_digest": "398801b3196502a72fee3198331db210295ba27c30f92928c9b47e5b6f18ebea"
+    },
+    {
+      "task_id": "cycle-06-post-victory",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/4] Implemented: pure postVictoryAction helper with three tests, hidden next-step button in the game foot, updateGameView/finishLevel/previewVictory wiring, click starts next or index, README and ADR-014",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794084294.19269,
+      "timestamp_str": "2026-11-07 23:44:54",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-06-post-victory",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/4] Verified: npm test 85/85; aikit check 5/5; Escape after First Light leaves Next chamber, clicking it loads Split Decision at 0 moves/par 2/0-2; mobile button 128x44 with no overflow; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794084295.5044818,
+      "timestamp_str": "2026-11-07 23:44:55",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-06-post-victory",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-06-post-victory' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794084321.7839735,
+      "timestamp_str": "2026-11-07 23:45:21",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

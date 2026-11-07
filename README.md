@@ -119,6 +119,7 @@ prism-relay/
 - **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
+- **No solved dead ends.** If the victory dialog is dismissed, the game foot keeps a Next chamber action (or Episode index on the finale) until the player restarts or leaves.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow

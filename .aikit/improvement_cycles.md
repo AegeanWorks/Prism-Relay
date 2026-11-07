@@ -13,7 +13,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 03 | Graphics and effects / portal legibility | done |
 | 04 | UI readability / compact HUD | done |
 | 05 | Progression and saves / future-version preservation | done |
-| 06 | Game feel | next |
+| 06 | Game feel / post-victory flow | done |
+| 07 | Progression UX / honest save status | next |
+| 08 | Game feel / charge feedback | planned |
 
 ---
 
@@ -424,6 +426,89 @@ console errors. Report: `.review/cycles/cycle-05/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(save): preserve records from newer save versions`.
+
+---
+
+## Cycle 06 - Game feel: a dismissed victory is not a dead end
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect: the victory dialog can be dismissed with Escape or the X button, but after dismissal the
+completed game screen has no forward control. The probe cleared First Light, pressed Escape and
+measured: screen `screen-game`, modal closed, 1 move, 1/1 receivers, status "Relay closed. Chamber
+complete.", `nextButton: false`; clicking the completed mirror left moves at 1. The next chamber was
+unlocked but reachable only through the back arrow and episode index.
+
+Baseline: `.review/cycles/cycle-06/before-postvictory-report.json` and
+`.review/cycles/cycle-06/before-first-light-victory-dismissed.png`.
+
+### ANALYZE
+
+- Survivor: keep the existing dismissal behavior and add a persistent forward action in the game
+  foot. It fixes the dead end without changing the dialog or trapping the player.
+- Survivor: derive the action from the existing victory result, so the next level and the finale's
+  index fallback stay consistent with the modal.
+- Killed: making the victory dialog non-dismissible. Escape and the X button are standard and the
+  player may want to inspect the solved board.
+- Killed: rerouting the X button to "Next". The icon means dismiss, and it would make Escape advance
+  without confirmation.
+- Killed: a fixed "Next" label on the finale. The finale has no next level, so the pure helper returns
+  "Episode index" instead.
+- Killed: changing engine completion state. `state.completed` already blocks rotation; only the
+  missing forward affordance was wrong.
+
+### IMPLEMENT
+
+Failing-first: `tests/hints.test.js` could not import `postVictoryAction`, and `tests/ui.test.js`
+failed because `data-ui="next-step"` was absent.
+
+Files:
+- `src/ui/hints.js`: `postVictoryAction(result)` returns the next-chamber or episode-index action.
+- `index.html`: hidden `data-ui="next-step"` button in the game foot.
+- `src/ui/app.js`: `updateGameView` reveals the button when completed with a result; `finishLevel`
+  and `previewVictory` refresh after storing the result; the click starts the next level or opens the
+  index; start/restart hide it.
+- `src/styles.css`: compact `.game-foot__next` sizing.
+- `tests/hints.test.js` (+3 cases), `tests/ui.test.js` (required control).
+- `README.md`, `.aikit/decisions.md` ADR-014.
+
+The UI inventory gains one control (`next-step`).
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, fresh storage, First Light solved in one real click, then
+Escape to dismiss the victory dialog.
+
+| Pair | Before | After |
+|---|---|---|
+| First Light after Escape | `.review/cycles/cycle-06/before-first-light-victory-dismissed.png` | `.review/cycles/cycle-06/after-first-light-victory-dismissed.png` |
+
+Before: status only, no forward control. After: centered "Next chamber →" button in the game foot.
+The after report records `nextButton: true`; clicking it loads Split Decision with moves 0, par 2,
+receivers 0/2 and the button hidden again:
+`.review/cycles/cycle-06/after-next-chamber-split-decision.png`.
+
+Mobile layout check: at 390x844 the button is 128x44px, `scrollWidth 390 = innerWidth 390`, full-page
+height 1387; screenshot `.review/cycles/cycle-06/after-first-light-dismissed-390x844.png`.
+
+Reports: `.review/cycles/cycle-06/before-postvictory-report.json` and
+`after-postvictory-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-06/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 85 tests, 85 pass, 0 fail (was 82; +3 post-victory action cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `control: next-step`; no other inventory drift.
+- `node --check src/ui/app.js`, `src/ui/hints.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(ux): keep a next chamber action after dismissing victory`.
+
 
 
 

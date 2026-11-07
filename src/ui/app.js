@@ -34,7 +34,7 @@ import {
   updateProfile,
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
-import { parHint } from "./hints.js";
+import { parHint, postVictoryAction } from "./hints.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -76,6 +76,7 @@ const elements = {
   gameHint: document.getElementById("game-hint"),
   gameMechanic: document.getElementById("game-mechanic"),
   statusLine: document.getElementById("status-line"),
+  nextStep: document.querySelector('[data-ui="next-step"]'),
   board: document.getElementById("board"),
   boardFrame: document.getElementById("board-frame"),
   beamLayer: document.getElementById("beam-layer"),
@@ -641,6 +642,13 @@ function updateGameView() {
   } else {
     elements.statusLine.textContent = "All receivers charged. Hold the circuit.";
   }
+  const nextAction = state.completed ? postVictoryAction(state.result) : null;
+  if (elements.nextStep) {
+    elements.nextStep.hidden = !nextAction;
+    if (nextAction) {
+      elements.nextStep.textContent = nextAction.label;
+    }
+  }
 }
 
 function finishLevel() {
@@ -675,6 +683,7 @@ function finishLevel() {
     episodeNumber: episode?.number ?? "I",
     preview: false,
   };
+  updateGameView();
   updateTitleStats();
   updateTopbarStatus();
   updateProfileChip();
@@ -1237,6 +1246,7 @@ function previewVictory() {
     episodeNumber: episode?.number ?? "I",
     preview: true,
   };
+  updateGameView();
   openVictoryModal();
 }
 
@@ -1297,6 +1307,17 @@ function bindEvents() {
   });
   document.querySelectorAll('[data-ui="reset-level"], [data-ui="restart-level-side"]').forEach((button) => {
     button.addEventListener("click", resetCurrentLevel);
+  });
+  elements.nextStep?.addEventListener("click", () => {
+    const action = postVictoryAction(state.result);
+    if (!action) {
+      return;
+    }
+    if (action.levelId) {
+      startLevel(action.levelId);
+    } else {
+      showScreen("chambers");
+    }
   });
   document.querySelectorAll('[data-ui="pause-game"]').forEach((button) => {
     button.addEventListener("click", openPauseModal);

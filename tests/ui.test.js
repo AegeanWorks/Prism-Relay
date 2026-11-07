@@ -27,6 +27,7 @@ const requiredControls = [
   "game-hint",
   "game-mechanic",
   "status-line",
+  "next-step",
   "profile-back",
   "profile-form",
   "profile-callsign",
