@@ -8,6 +8,7 @@ import {
   nextLevel,
 } from "../game/levels.js";
 import {
+  cellNear,
   createSession,
   resetSession,
   rotateSessionCell,
@@ -32,6 +33,7 @@ import {
   statsFor,
   updateProfile,
 } from "./progress.js";
+import { feedbackFor, portalTransitKey } from "./cues.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -571,22 +573,6 @@ function renderBeams() {
   }
 }
 
-function cellNear(board, point) {
-  const x = Math.floor(point.x);
-  const y = Math.floor(point.y);
-  const clampedX = Math.min(Math.max(x, 0), board.width - 1);
-  const clampedY = Math.min(Math.max(y, 0), board.height - 1);
-  const direct = board.cells[clampedY]?.[clampedX] ?? null;
-  if (
-    direct &&
-    Math.abs(point.x - (direct.x + 0.5)) < 0.52 &&
-    Math.abs(point.y - (direct.y + 0.5)) < 0.52
-  ) {
-    return direct;
-  }
-  return null;
-}
-
 function updateGameView() {
   if (!state.session || !state.level) {
     return;
@@ -764,6 +750,10 @@ function rotatePiece(x, y, element) {
     return;
   }
   const cell = state.session.board.cells[y]?.[x];
+  const before = {
+    lit: state.session.litCount,
+    portalKey: portalTransitKey(state.session.board, state.session.paths),
+  };
   const changed = rotateSessionCell(state.session, x, y);
   if (!changed || !cell) {
     return;
@@ -775,6 +765,16 @@ function rotatePiece(x, y, element) {
     audio.playSplit();
   } else {
     audio.playRotate();
+  }
+  const feedback = feedbackFor(before, {
+    lit: state.session.litCount,
+    portalKey: portalTransitKey(state.session.board, state.session.paths),
+  });
+  if (feedback.charge) {
+    audio.playCharge();
+  }
+  if (feedback.portal) {
+    audio.playPortal();
   }
   element.classList.remove("is-turning");
   void element.offsetWidth;

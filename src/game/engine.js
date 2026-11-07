@@ -127,6 +127,22 @@ export function cellAt(board, x, y) {
   return board.cells[y][x];
 }
 
+export function cellNear(board, point) {
+  const x = Math.floor(point.x);
+  const y = Math.floor(point.y);
+  const clampedX = Math.min(Math.max(x, 0), board.width - 1);
+  const clampedY = Math.min(Math.max(y, 0), board.height - 1);
+  const direct = board.cells[clampedY]?.[clampedX] ?? null;
+  if (
+    direct &&
+    Math.abs(point.x - (direct.x + 0.5)) < 0.52 &&
+    Math.abs(point.y - (direct.y + 0.5)) < 0.52
+  ) {
+    return direct;
+  }
+  return null;
+}
+
 export function reflect(orientation, direction) {
   return orientation === 0 ? direction ^ 1 : direction ^ 3;
 }

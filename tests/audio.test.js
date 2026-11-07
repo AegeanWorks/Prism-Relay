@@ -4,6 +4,7 @@ import {
   isEnabled,
   isMusicEnabled,
   isMusicPlaying,
+  playCharge,
   playError,
   playPortal,
   playRotate,
@@ -35,6 +36,7 @@ test("all synthesized cues no-throw without an AudioContext", () => {
   assert.doesNotThrow(() => {
     playRotate();
     playSplit();
+    playCharge();
     playPortal();
     playUi();
     playError();

@@ -56,7 +56,7 @@ Every episode ends with a larger, harder finale. Par rises from 1 move in First 
 
 The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars.
 
-Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M.
+Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M. A rotation also reports its consequence: a two-note charge when a receiver lights, and a gate sweep when a beam's portal transit changes.
 
 Progress is stored in `localStorage` under `prism-relay.progress.v1`. A missing or corrupt record resets safely; an older record without profile, music or episode fields keeps its stars and gains defaults. Sequential unlocks are repaired from completed chambers, so a save that finished Ignition opens Refraction automatically.
 
@@ -90,8 +90,9 @@ prism-relay/
 │   │   └── solver.js          <- exhaustive minimum-move solver over all rotatables
 │   ├── ui/
 │   │   ├── app.js             <- screens, board renderer, profile, input, dialogs
-│   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
 │   │   ├── audio.js           <- generated effects and ambient music, no assets
+│   │   ├── cues.js            <- state-derived charge and portal sound decisions
+│   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
 │   │   └── progress.js        <- versioned saves, profile, rank and statistics
 │   ├── styles.css             <- component styling using theme tokens
 │   └── theme.css              <- the only file with raw color and font values
@@ -101,6 +102,7 @@ prism-relay/
     ├── progress.test.js       <- saves, profile, rank, unlocks, audio settings
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
     ├── layout.test.js         <- viewport fit arithmetic for tall chambers
+    ├── cues.test.js           <- charge and portal transit cue decisions
     └── ui.test.js             <- screen, control and manifest contract
 ```
 

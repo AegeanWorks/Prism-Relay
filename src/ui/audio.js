@@ -173,6 +173,11 @@ export function playSplit() {
   tone(780, 0.09, "sine", 0.025, 0.04);
 }
 
+export function playCharge() {
+  tone(880, 0.09, "sine", 0.024);
+  tone(1318.5, 0.14, "sine", 0.02, 0.055);
+}
+
 export function playPortal() {
   tone(330, 0.16, "sine", 0.03);
   tone(660, 0.18, "sine", 0.022, 0.08);

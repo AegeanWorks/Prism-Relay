@@ -5,6 +5,7 @@ import {
   NORTH,
   SOUTH,
   WEST,
+  cellNear,
   createSession,
   parseLevel,
   refreshSession,
@@ -66,6 +67,12 @@ test("cells without a rotatable piece cannot rotate", () => {
   assert.equal(rotateSessionCell(session, 0, 0), false);
   assert.equal(rotateSessionCell(session, 3, 0), false);
   assert.equal(session.moves, 0);
+});
+
+test("cellNear resolves a beam endpoint to its tile and rejects open space", () => {
+  const board = parseLevel(level([">.T", "..."]));
+  assert.equal(cellNear(board, { x: 1.5, y: 0.5 }), board.cells[0][1]);
+  assert.equal(cellNear(board, { x: 3.5, y: 0.5 }), null);
 });
 
 test("walls stop a beam", () => {

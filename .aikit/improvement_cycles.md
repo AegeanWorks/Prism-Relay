@@ -9,8 +9,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | Cycle | Area | Status |
 |---|---|---|
 | 01 | Levels / tall-chamber presentation | done |
-| 02 | Audio cues | next |
-| 03 | Graphics and effects | planned |
+| 02 | Audio cues | done |
+| 03 | Graphics and effects | next |
 | 04 | UI readability | planned |
 | 05 | Progression and saves | planned |
 | 06 | Game feel | planned |
@@ -104,3 +104,85 @@ bottom at 1024 inside the 1080px viewport.
 - Playwright reports: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(levels): fit tall chambers to the desktop viewport` (code, tests, README, ADR, ledger).
+
+---
+
+## Cycle 02 - Audio cues for beam-state changes
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect: the two most important consequences of a rotation were silent. An instrumented real click on
+Split Decision (rotate mirror 4,2; receivers 0/2 to 1/2) produced only the 660Hz rotate tone; a real
+click on Detour (flip splitter 2,3, which routes the beam through portal 2) produced only the
+520/780Hz splitter pair. `audio.js` already exported `playPortal()` and `audio.test.js` covered it,
+but no application code ever called it. The player hears the action, not what it did.
+
+Baseline report: `.review/cycles/cycle-02/before-audio-report.json`; tones were counted by wrapping
+`AudioContext.prototype.createOscillator` in the page and logging each oscillator's scheduled
+frequency during a real Playwright click.
+
+### ANALYZE
+
+- Survivor: derive cues from the beam state before and after the rotation, so the cue always matches
+  what actually changed and no engine rewrite is needed.
+- Survivor: layer consequence cues over the existing action sound; replacing the rotate/split click
+  would lose the tactile response.
+- Survivor: reuse the already-shipped portal sweep instead of adding another sound.
+- Killed: playing a cue per portal segment per frame. That would machine-gun on every render and is
+  not tied to user action.
+- Killed: a visual change. This cycle is audio-only; no screenshot pair is claimed for it.
+- Killed: charging the cue on receiver loss. A charge cue means progress; disconnects stay silent.
+
+### IMPLEMENT
+
+Failing-first: `tests/cues.test.js` failed with `ERR_MODULE_NOT_FOUND` before `src/ui/cues.js` existed.
+
+Files:
+- `src/game/engine.js`: export the existing geometry helper `cellNear(board, point)` so the cue layer
+  can resolve a beam endpoint without duplicating tile math; `app.js` now imports it.
+- `src/ui/cues.js` (new): `portalTransitKey(board, paths)` returns the sorted portal cells where beam
+  segments end; `feedbackFor(before, after)` reports `{charge, portal}` from the lit-receiver count and
+  the transit key.
+- `src/ui/audio.js`: new `playCharge()` at 880Hz then 1318.5Hz, low gain, layered after the action.
+- `src/ui/app.js`: capture `{lit, portalKey}` before rotating; after rotating, play `playCharge()` on a
+  receiver rise and `playPortal()` when the transit signature changes.
+- `tests/cues.test.js` (new, 10 cases), `tests/engine.test.js` (cellNear), `tests/audio.test.js`
+  (playCharge no-throw).
+- `README.md`, `.aikit/decisions.md` ADR-010.
+
+### PROOF
+
+Played runs with the same setup: headless Edge 157, 1440x900, music disabled in the seeded save so the
+pad oscillators cannot pollute the count, one real pointer click on the named board button.
+
+| Played click | State change | Before tones | After tones |
+|---|---|---|---|
+| Split Decision mirror (4,2) | receivers 0/2 to 1/2 | `[660]` | `[660, 880, 1318.5]` |
+| Detour splitter (2,3) | portal transit `""` to `2,5` | `[520, 780]` | `[520, 780, 330, 660]` |
+| Wormhole mirror (7,1) | receivers 0/3 to 1/3, no gate change | `[660]` | `[660, 880, 1318.5]` |
+
+The third case proves the charge cue is tied to receiver progress and does not fire a portal sweep
+when the transit signature did not change. Reports: `.review/cycles/cycle-02/before-audio-report.json`
+and `.review/cycles/cycle-02/after-audio-report.json`.
+
+State screenshots (audio-only, so these are not a visual-change claim; they show the identical board
+state on both builds): `.review/cycles/cycle-02/before-receiver-charge-after-click.png` and
+`receiver-charge-after-click.png` (1/2 receivers), `before-portal-transit-after-click.png` and
+`portal-transit-after-click.png` (0/2 receivers, beam through gate 2), plus the Wormhole plain case.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors and 0 page errors. The Confluence 13 moves, Crosscurrent 9, Long Way Home 13. Report:
+`.review/cycles/cycle-02/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 73 tests, 73 pass, 0 fail (was 62; +10 cue cases, +1 cellNear case).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new UI handle.
+- `node --check src/ui/app.js`, `src/ui/cues.js`, `src/game/engine.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(audio): report receiver charges and portal transits`.
+

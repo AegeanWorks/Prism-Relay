@@ -1,70 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-01-board-fit",
+    "task_id": "cycle-02-audio-feedback",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794078728.4650218,
+    "updated_at": 1794080345.581634,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794078751.2718725
+    "completed_at": 1794080367.1507502
   },
   "checkpoints": [
-    {
-      "task_id": "one-click-start",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'one-click-start' completed successfully.",
-      "status": "completed",
-      "timestamp": 1792922718.0184746,
-      "timestamp_str": "2026-10-25 13:05:18",
-      "agent": "opencode:deepseek-v4.1-flash-free"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 2",
-      "phase_num": 3,
-      "description": "Reforge stage 2: window 6, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
-      "files_affected": [
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793292711.018971,
-      "timestamp_str": "2026-10-29 19:51:51",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 3",
-      "phase_num": 3,
-      "description": "Reforge stage 3: window 9, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 5 binary not analysed",
-      "files_affected": [
-        "assets/artwork.jpg",
-        "assets/logo.jpg",
-        "assets/logo.png",
-        "assets/social-preview.jpg",
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793292780.906022,
-      "timestamp_str": "2026-10-29 19:53:00",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 4",
-      "phase_num": 3,
-      "description": "Reforge stage 4: window 12, 3 commit(s), 3 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
-      "files_affected": [
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793292810.0470648,
-      "timestamp_str": "2026-10-29 19:53:30",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 5",
@@ -248,6 +195,56 @@
       "status": "completed",
       "timestamp": 1794078751.2718747,
       "timestamp_str": "2026-11-07 22:12:31",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-02-audio-feedback",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/4] Plan: give beam-state changes audible feedback with a pure cue decision, a receiver-charge chime, and the dead portal cue wired to real transits",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794079389.4408293,
+      "timestamp_str": "2026-11-07 22:23:09",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "A played run shows the core progress events are silent: rotating a mirror that charges a receiver on Split Decision plays only the 660Hz rotate click, and flipping the Detour splitter that changes the portal transit plays only the splitter pair, even though audio.js already ships playPortal() unused. The player hears the action but not what it did.",
+        "benefits": "Receiver progress and portal transits become audible without new assets or dependencies; the existing synthesized portal cue stops being dead code; action and consequence sounds layer instead of replacing each other.",
+        "risks": "contract: cellNear moves from app.js into the pure engine; dependency: none, WebAudio only; concurrency: several tones can start in one gesture, so gains must stay low; state: no save change, no visual or inventory change; tests run without AudioContext.",
+        "mitigation": "Pure feedbackFor/portalTransitKey module with unit tests, engine-level cellNear tests, a two-note charge at low gain, and a Playwright run that counts actual oscillator frequencies before and after one real click on Split Decision, Detour and Wormhole."
+      },
+      "plan_digest": "87da1b1adf01217b18cc59c8772e4420f2c65ba97493022e2eb754bf7f749c09"
+    },
+    {
+      "task_id": "cycle-02-audio-feedback",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/4] Implemented: engine-level cellNear export, pure cues module (portalTransitKey/feedbackFor) with 10 tests, two-note playCharge, app wiring for charge and portal consequence cues, README and ADR-010",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794080345.1398761,
+      "timestamp_str": "2026-11-07 22:39:05",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-02-audio-feedback",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/4] Verified: npm test 73/73; aikit check 5/5; real clicks add 880/1318.5Hz on receiver charge and 330/660Hz on portal transit while no-change rotations stay silent; 18/18 levels still solved at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794080345.581634,
+      "timestamp_str": "2026-11-07 22:39:05",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-02-audio-feedback",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-02-audio-feedback' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794080367.150752,
+      "timestamp_str": "2026-11-07 22:39:27",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]
