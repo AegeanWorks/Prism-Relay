@@ -22,7 +22,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 12 | UI readability / mobile modal actions | done |
 | 13 | Progression UX / rank progress | done |
 | 14 | Game feel / last-move marker | done |
-| 15 | UI readability / endgame CTA | next |
+| 15 | UI readability / endgame CTA | done |
+| 16 | Audio / victory music ducking | next |
 
 ---
 
@@ -1095,6 +1096,76 @@ console errors. Report: `.review/cycles/cycle-14/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(game): keep a marker on the last rotated cell`.
+
+---
+
+## Cycle 15 - UI readability: the title action after a full clear
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: a played 54-star save still showed "Enter the relay" on the title action, and clicking it
+started First Light. The completion was visible in the 54/54 stat, but the primary label described a
+first entry while the action was a replay, so the button lied about what it did.
+
+Baseline (worktree at 6eaa25e): `.review/cycles/cycle-15/before-endgame-report.json` and
+`before-title-54-stars.png` — 54 stars, `startLabel: null`, `startText: "Enter the relay →"`.
+
+### ANALYZE
+
+- Survivor: make the label reflect completion while leaving the click behavior unchanged. A replay
+  from First Light is a valid endgame action; only the copy was wrong.
+- Survivor: a pure helper that takes completed and total counts, so 0/17/18 and invalid totals are
+  testable without the DOM.
+- Survivor: wrap only the text in a span so the arrow and button layout stay intact.
+- Killed: changing the click to open the episode index. The current behavior is a coherent "replay the
+  relay from the start"; the label now says so.
+- Killed: a separate endgame screen or badge. The title already carries 54/54 and best moves.
+- Killed: changing the chamber count or title stats. They are correct.
+
+### IMPLEMENT
+
+Failing-first: `tests/hints.test.js` imported `relayCtaLabel` before it existed, and `tests/ui.test.js`
+failed on the missing `start-label` span.
+
+Files:
+- `src/ui/hints.js`: `relayCtaLabel(completed, total)` returns "Replay the relay" only at a full,
+  non-zero clear.
+- `index.html`: title action text wrapped in `#start-label`.
+- `src/ui/app.js`: `updateTitleStats` updates the label on every title render.
+- `tests/hints.test.js` (+3 cases), `tests/ui.test.js` (label-span contract).
+- `README.md`, `.aikit/decisions.md` ADR-023.
+
+No engine, level, save or inventory change.
+
+### PROOF
+
+Same setup: the endgame probe clears all 18 chambers through real solver-guided clicks at par, then
+loads `?screen=title` at 1440x900. The before run used a detached worktree at the cycle-14 commit
+served on a separate port; the after run used the working tree.
+
+| Pair | Before | After |
+|---|---|---|
+| Title at 54/54 stars | `.review/cycles/cycle-15/before-title-54-stars.png` | `.review/cycles/cycle-15/after-title-54-stars.png` |
+
+Before: 54 stars, 111 best moves, action "Enter the relay →". After: same stats, action
+"Replay the relay →". In both runs clicking the action opens First Light at 0 moves. Reports:
+`.review/cycles/cycle-15/before-endgame-report.json` and `after-endgame-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-15/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 106 tests, 106 pass, 0 fail (was 103; +3 CTA-label cases, +1 span contract).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js`, `src/ui/hints.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(ui): label the title action as a replay after a full clear`.
+
 
 
 

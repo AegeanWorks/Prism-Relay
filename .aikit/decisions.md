@@ -175,3 +175,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Add `is-last-moved` to the clicked cell and remove it from every other rotatable on each successful rotation; reset clears it too. Use a per-node `WeakMap` timer to remove `is-turning` after 320ms, clearing any prior timer first so rapid clicks restart both the animation and the cleanup. CSS draws a thin current-cyan outline inside the cell gutter, mapped to Highlight in forced colors.
 - **Consequences**: A real splitter click leaves `lastMoved: ["2,3"]` and `turning: []` after 450ms; clicking the mirror moves the marker to `["4,3"]`; reset leaves both empty. The board crop shows the outline moving to the clicked cell. No engine, level, save or inventory change; `npm test` stays at 103 because the interaction is covered by the played probe.
 
+### ADR-023: The title action becomes a replay after all eighteen chambers
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: A played 54-star save showed "Enter the relay" on the title action, and clicking it started First Light. The completion state was visible in the 54/54 stat but the primary label still described a first entry, so the endgame action lied about what it did.
+- **Decision**: Add `relayCtaLabel(completed, total)` in `src/ui/hints.js`; it returns "Replay the relay" only when `total > 0` and every chamber is complete, otherwise "Enter the relay". Wrap the title button text in `#start-label` and update it from `updateTitleStats` on every title render. The click behavior is unchanged: it still starts the first uncleared chamber, which is First Light after a full clear.
+- **Consequences**: A played 18/18 save with 54 stars and 111 best moves reads "Replay the relay"; clicking it starts First Light at 0 moves. A save at 0 or 17 cleared chambers still reads "Enter the relay". No engine, level, save or UI-inventory change; `npm test` moves 103 to 106 with three CTA-label cases and one label-span contract.
+

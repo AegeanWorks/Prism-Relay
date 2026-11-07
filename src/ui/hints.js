@@ -16,3 +16,7 @@ export function postVictoryAction(result) {
 export function saveStatusMessage(saved, success) {
   return saved ? success : "Changes are not being stored.";
 }
+
+export function relayCtaLabel(completed, total) {
+  return total > 0 && completed >= total ? "Replay the relay" : "Enter the relay";
+}

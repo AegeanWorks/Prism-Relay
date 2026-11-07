@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parHint, postVictoryAction, saveStatusMessage } from "../src/ui/hints.js";
+import {
+  parHint,
+  postVictoryAction,
+  relayCtaLabel,
+  saveStatusMessage,
+} from "../src/ui/hints.js";
 
 test("a one-move par reads as a singular move", () => {
   assert.equal(parHint(1), "Par is 1 move. Every rotation counts.");
@@ -40,4 +45,18 @@ test("a completed save reports the action's success copy", () => {
 
 test("a refused save reports that changes are not stored", () => {
   assert.equal(saveStatusMessage(false, "Callsign saved."), "Changes are not being stored.");
+});
+
+test("the title CTA invites a first run until every chamber is cleared", () => {
+  assert.equal(relayCtaLabel(0, 18), "Enter the relay");
+  assert.equal(relayCtaLabel(17, 18), "Enter the relay");
+});
+
+test("the title CTA becomes a replay at eighteen of eighteen", () => {
+  assert.equal(relayCtaLabel(18, 18), "Replay the relay");
+  assert.equal(relayCtaLabel(19, 18), "Replay the relay");
+});
+
+test("a zero total does not claim a replay", () => {
+  assert.equal(relayCtaLabel(0, 0), "Enter the relay");
 });

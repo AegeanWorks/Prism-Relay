@@ -131,6 +131,7 @@ prism-relay/
 - **No solved dead ends.** If the victory dialog is dismissed, the game foot keeps a Next chamber action (or Episode index on the finale) until the player restarts or leaves.
 - **Pinned modal actions.** Modal bodies scroll while the action row stays fixed at the bottom, so a phone can tap Return, Next or Replay without scrolling; a one-pixel rule separates the scrolling body from the actions.
 - **Visible rank progress.** The profile line under the rank names the next rank and the stars remaining; at the cap it reports that all 54 stars are collected.
+- **Endgame CTA.** The title action reads "Enter the relay" until all 18 chambers are cleared, then "Replay the relay"; both start the first uncleared chamber, or First Light after a full clear.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow

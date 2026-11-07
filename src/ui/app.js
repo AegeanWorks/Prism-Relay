@@ -34,7 +34,7 @@ import {
   updateProfile,
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "./cues.js";
-import { parHint, postVictoryAction, saveStatusMessage } from "./hints.js";
+import { parHint, postVictoryAction, relayCtaLabel, saveStatusMessage } from "./hints.js";
 import { mechanicNotes } from "./mechanics.js";
 import { starLabel, starsMarkup } from "./stars.js";
 
@@ -67,6 +67,7 @@ const elements = {
   profileChipSigil: document.getElementById("profile-chip-sigil"),
   titleStars: document.getElementById("title-stars"),
   titleBest: document.getElementById("title-best"),
+  startLabel: document.getElementById("start-label"),
   chamberGrid: document.getElementById("chamber-grid"),
   chamberProgressFill: document.getElementById("chamber-progress-fill"),
   chamberProgressTrack: document.getElementById("chamber-progress-track"),
@@ -175,6 +176,9 @@ function updateTitleStats() {
   const stats = statsFor(state.progress);
   elements.titleStars.textContent = String(stats.stars).padStart(2, "0");
   elements.titleBest.textContent = stats.completed > 0 ? `${stats.moves} moves` : "—";
+  if (elements.startLabel) {
+    elements.startLabel.textContent = relayCtaLabel(stats.completed, stats.totalLevels);
+  }
 }
 
 function updateTopbarStatus() {

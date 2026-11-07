@@ -54,6 +54,7 @@ test("the document ships all four screens and a module entry point", () => {
     assert.match(html, new RegExp(`data-panel="screen-${screen}"`));
   }
   assert.match(html, /<script type="module" src="\.\/src\/ui\/app\.js"><\/script>/);
+  assert.match(html, /id="start-label"/);
 });
 
 test("every essential control has a stable data-ui handle", () => {
