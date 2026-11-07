@@ -33,7 +33,7 @@ import {
   statsFor,
   updateProfile,
 } from "./progress.js";
-import { feedbackFor, portalTransitKey } from "./cues.js";
+import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -525,6 +525,21 @@ function updateBoard() {
       node.classList.toggle("is-lit", lit);
       node.setAttribute("aria-label", lit ? "Receiver, charged." : "Receiver, waiting for light.");
     }
+  }
+  const livePairs = new Set(livePortalPairs(state.session.board, trace.paths));
+  for (const portal of state.session.board.portals) {
+    const node = state.cellElements.get(`${portal.x},${portal.y}`);
+    if (!node) {
+      continue;
+    }
+    const live = livePairs.has(portal.pair);
+    node.classList.toggle("is-live", live);
+    node.setAttribute(
+      "aria-label",
+      live
+        ? `${cellLabel(portal)} The beam is passing through this pair.`
+        : cellLabel(portal),
+    );
   }
   renderBeams();
   updateGameView();

@@ -1504,6 +1504,11 @@ dd {
   50% { opacity: 1; transform: scale(1.12); }
 }
 
+@keyframes portal-ring {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50% { opacity: 0.92; transform: scale(1.06); }
+}
+
 @keyframes core-breathe {
   0%, 100% {
     box-shadow: 0 0 60px var(--beam-cyan-soft), 0 0 120px var(--beam-magenta-soft), var(--shadow-panel);
@@ -1791,6 +1796,10 @@ dd {
   }
 
   .cell--receiver.is-lit .piece--receiver {
+    border-color: Highlight;
+  }
+
+  .cell--portal.is-live .piece--portal {
     border-color: Highlight;
   }
 }
@@ -2175,6 +2184,8 @@ dd {
   box-shadow:
     0 0 22px var(--beam-lime-soft),
     inset 0 0 22px var(--beam-lime-soft);
+  color: var(--beam-lime);
+  transition: opacity var(--speed-mid) var(--ease-out), filter var(--speed-mid) var(--ease-out);
 }
 
 .piece--portal::before {
@@ -2186,31 +2197,78 @@ dd {
   opacity: 0.55;
 }
 
+.piece--portal::after {
+  position: absolute;
+  inset: -20%;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-round);
+  content: "";
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity var(--speed-mid) var(--ease-out), transform var(--speed-mid) var(--ease-out);
+}
+
+.cell--portal:not(.is-live) .piece--portal {
+  opacity: 0.55;
+  filter: saturate(0.6);
+}
+
+.cell--portal.is-live .piece--portal {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.cell--portal.is-live .piece--portal::after {
+  opacity: 0.78;
+  transform: scale(1);
+  animation: portal-ring 2.8s ease-in-out infinite;
+}
+
+.piece--portal[data-pair="2"] {
+  border-color: var(--beam-cyan);
+  box-shadow:
+    0 0 22px var(--beam-cyan-soft),
+    inset 0 0 22px var(--beam-cyan-soft);
+  color: var(--beam-cyan);
+}
+
+.piece--portal[data-pair="2"]::before {
+  border-color: var(--beam-cyan);
+}
+
 .piece--portal[data-pair="3"] {
   border-color: var(--beam-magenta);
   box-shadow:
     0 0 22px var(--beam-magenta-soft),
     inset 0 0 22px var(--beam-magenta-soft);
+  color: var(--beam-magenta);
 }
 
 .piece--portal[data-pair="3"]::before {
   border-color: var(--beam-magenta);
 }
 
+.piece--portal[data-pair="4"] {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 22px var(--gold-soft),
+    inset 0 0 22px var(--gold-soft);
+  color: var(--gold);
+}
+
+.piece--portal[data-pair="4"]::before {
+  border-color: var(--gold);
+}
+
 .portal-glyph {
   position: relative;
   z-index: 1;
-  color: var(--beam-lime);
+  color: inherit;
   font-family: var(--font-mono);
   font-size: var(--size-xs);
   font-weight: var(--weight-bold);
   line-height: 1;
-  text-shadow: 0 0 10px var(--beam-lime);
-}
-
-.piece--portal[data-pair="3"] .portal-glyph {
-  color: var(--beam-magenta);
-  text-shadow: 0 0 10px var(--beam-magenta);
+  text-shadow: 0 0 10px currentColor;
 }
 
 .screen--profile {

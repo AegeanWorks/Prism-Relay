@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import {
   createSession,
   parseLevel,
+  refreshSession,
   rotateSessionCell,
   traceBeams,
 } from "../src/game/engine.js";
 import { levelById } from "../src/game/levels.js";
-import { feedbackFor, portalTransitKey } from "../src/ui/cues.js";
+import { feedbackFor, livePortalPairs, portalTransitKey } from "../src/ui/cues.js";
 
 test("a segment that ends on a portal identifies the transit gate", () => {
   const board = parseLevel({ id: "portal", rows: [">.1T", "..1."] });
@@ -30,6 +31,26 @@ test("detour's splitter flip routes the beam through gate 2", () => {
   assert.equal(portalTransitKey(session.board, session.paths), "");
   rotateSessionCell(session, 2, 3);
   assert.equal(portalTransitKey(session.board, session.paths), "2,5");
+});
+
+test("a live entry gate marks its whole pair, not just the entry", () => {
+  const session = createSession(levelById("long-way-home"));
+  refreshSession(session);
+  assert.deepEqual(livePortalPairs(session.board, session.paths), ["1"]);
+});
+
+test("a new transit adds its pair without dropping the existing one", () => {
+  const session = createSession(levelById("the-confluence"));
+  refreshSession(session);
+  assert.deepEqual(livePortalPairs(session.board, session.paths), ["2"]);
+  rotateSessionCell(session, 2, 3);
+  assert.deepEqual(livePortalPairs(session.board, session.paths), ["1", "2"]);
+});
+
+test("a gate pair with no beam is not live", () => {
+  const session = createSession(levelById("relay-chain"));
+  refreshSession(session);
+  assert.deepEqual(livePortalPairs(session.board, session.paths), []);
 });
 
 test("a rise in charged receivers is a charge event", () => {

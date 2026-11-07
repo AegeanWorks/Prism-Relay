@@ -10,8 +10,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 |---|---|---|
 | 01 | Levels / tall-chamber presentation | done |
 | 02 | Audio cues | done |
-| 03 | Graphics and effects | next |
-| 04 | UI readability | planned |
+| 03 | Graphics and effects / portal legibility | done |
+| 04 | UI readability | next |
 | 05 | Progression and saves | planned |
 | 06 | Game feel | planned |
 
@@ -185,4 +185,88 @@ console errors and 0 page errors. The Confluence 13 moves, Crosscurrent 9, Long 
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(audio): report receiver charges and portal transits`.
+
+---
+
+## Cycle 03 - Graphics and effects: live portal pair legibility
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect: portal gates all rendered at full brightness whether or not the beam used them, and pairs 1,
+2 and 4 all used lime. In Long Way Home the live pair 1 and the idle pair 3 were visually identical;
+in The Confluence the live pair 2 looked exactly like idle pairs 1 and 4. With four pairs in the
+finale, the gate number was the only clue.
+
+Evidence: `.review/cycles/cycle-03/before-long-way-home-board.png` (pairs 1 and 3 both bright) and
+`.review/cycles/cycle-03/before-the-confluence-board.png` (pair 2 live but same lime as idle 1/4).
+Captured on the cycle-02 build, 1440x900, device scale 2, `?level=<id>`, fresh storage.
+
+### ANALYZE
+
+- Survivor: derive the live pair set from the existing trace (entry gate to pair), then style both
+  gates of that pair. It is tied to the actual beam and needs no engine change.
+- Survivor: give all four pairs distinct colors. This fixes the 1/2/4 collision independent of the
+  live state.
+- Survivor: dim idle gates and keep live gates at full glow with a ring. The difference survives a
+  still screenshot and a reduced-motion setting.
+- Killed: a per-frame particle burst. It would not survive a still pair and would add animation cost
+  to every re-render.
+- Killed: adding a new panel or legend row. The legend already explains portals; the board itself is
+  the right place to read liveness.
+- Killed: changing the pair numbers or level data. Both are correct; only the presentation was flat.
+
+### IMPLEMENT
+
+Failing-first: `tests/cues.test.js` imported `livePortalPairs` before it existed (module import failed).
+
+Files:
+- `src/ui/cues.js`: new `livePortalPairs(board, paths)` that expands each entry gate from
+  `portalTransitKey` to its pair label.
+- `src/ui/app.js`: `updateBoard` computes the live set from the trace, toggles `is-live` on both gate
+  cells and appends "The beam is passing through this pair." to the accessible label.
+- `src/styles.css`: pair colors (1 lime, 2 cyan, 3 magenta, 4 gold), idle dim (0.55 opacity, 0.6
+  saturation), live drop shadow, breathing `::after` ring, `portal-ring` keyframes, forced-colors
+  Highlight border.
+- `tests/cues.test.js`: three live-pair cases (pair expansion, added pair, no transit).
+- `README.md`, `.aikit/decisions.md` ADR-011.
+
+No engine, level, save, interaction or UI-inventory handle changed.
+
+### PROOF
+
+Same setup for both pairs: headless Edge 157, 1440x900, device scale 2 for board crops, fresh browser
+context and storage, URL `/?level=<id>`.
+
+| Pair | Before | After |
+|---|---|---|
+| Long Way Home, initial (pair 1 live, pair 3 idle) | `.review/cycles/cycle-03/before-long-way-home-board.png` | `.review/cycles/cycle-03/after-long-way-home-board.png` |
+| The Confluence, initial (pair 2 live, 1/3/4 idle) | `.review/cycles/cycle-03/before-the-confluence-board.png` | `.review/cycles/cycle-03/after-the-confluence-board.png` |
+
+The after crops show live pair 1 in full lime with a ring against dim magenta pair 3, and live pair 2
+in cyan against dim lime pair 1, magenta pair 3 and gold pair 4. Full-screen pairs are also stored as
+`before/after-long-way-home-screen.png` and `before/after-the-confluence-screen.png`.
+
+Played run, The Confluence, real pointer clicks:
+`.review/cycles/cycle-03/portal-play-report.json`.
+
+- Initial: live `[2,2]`, idle `[1,1,3,3,4,4]`; only the two pair-2 labels mention the beam.
+- After one real splitter click at (2,3): live `[1,1,2,2]`, idle `[3,3,4,4]`; pair 1 labels changed.
+- Full clear: 13 moves, 6/6 receivers, 3 stars, all four pairs live (`allLiveAtEnd: true`), 0 page
+  and console errors. Completion board: `.review/cycles/cycle-03/confluence-complete-board.png`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-03/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 76 tests, 76 pass, 0 fail (was 73; +3 live-pair cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new UI handle.
+- `node --check src/ui/app.js`, `src/ui/cues.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(ui): highlight live portal pairs and color all four gates`.
+
 

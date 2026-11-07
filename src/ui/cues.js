@@ -15,6 +15,21 @@ export function portalTransitKey(board, paths = []) {
   return [...keys].sort().join("|");
 }
 
+export function livePortalPairs(board, paths = []) {
+  const pairs = new Set();
+  for (const key of portalTransitKey(board, paths).split("|")) {
+    if (!key) {
+      continue;
+    }
+    const [x, y] = key.split(",").map(Number);
+    const cell = board?.cells?.[y]?.[x];
+    if (cell?.kind === "portal") {
+      pairs.add(cell.pair);
+    }
+  }
+  return [...pairs].sort();
+}
+
 export function feedbackFor(before = {}, after = {}) {
   return {
     charge: (after?.lit ?? 0) > (before?.lit ?? 0),

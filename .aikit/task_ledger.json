@@ -1,64 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-02-audio-feedback",
+    "task_id": "cycle-03-portal-legibility",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794080345.581634,
+    "updated_at": 1794081508.6347594,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794080367.1507502
+    "completed_at": 1794081519.5387414
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 5",
-      "phase_num": 3,
-      "description": "Reforge stage 5: window 15, 3 commit(s), 8 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 2 binary not analysed",
-      "files_affected": [
-        "assets/screenshots/2026-10-28-home.png",
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793292866.5682535,
-      "timestamp_str": "2026-10-29 19:54:26",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 6",
-      "phase_num": 3,
-      "description": "Reforge stage 6: window 18, 3 commit(s), 15 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793292986.7576632,
-      "timestamp_str": "2026-10-29 19:56:26",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 7",
-      "phase_num": 3,
-      "description": "Reforge stage 7: window 21, 3 commit(s), 16 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293114.6525202,
-      "timestamp_str": "2026-10-29 19:58:34",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 8",
-      "phase_num": 3,
-      "description": "Reforge stage 8: window 24, 3 commit(s), 4 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293342.6886718,
-      "timestamp_str": "2026-10-29 20:02:22",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 9",
@@ -245,6 +198,56 @@
       "status": "completed",
       "timestamp": 1794080367.150752,
       "timestamp_str": "2026-11-07 22:39:27",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-03-portal-legibility",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/4] Plan: make live portal pairs legible with four pair colors, a live glow ring, and a pure live-pair helper driven by the beam trace",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794080884.777936,
+      "timestamp_str": "2026-11-07 22:48:04",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "Portal gates are rendered at identical full brightness whether or not the beam uses them, and pairs 1, 2 and 4 share the same lime. In Long Way Home pair 1 carries the beam and pair 3 is idle, yet all four gates glow the same; in The Confluence active pair 2 is indistinguishable from idle pairs 1 and 4.",
+        "benefits": "Players can read which pair is live at a glance, and four gate pairs get four colors (lime, cyan, magenta, gold) instead of two; this supports the multi-pair Episode IV chambers without changing rules or levels.",
+        "risks": "contract: adds visual state classes only, no UI handles; dependency: none; concurrency: one class toggle per portal on the existing trace; state: no save change; color contrast and forced-colors must stay legible.",
+        "mitigation": "Pure livePortalPairs() unit-tested against Long Way Home, The Confluence and an unused-pair level; class toggling reuses the existing traceBeams paths; screenshots from identical state and viewport; forced-colors rule and reduced-motion animation; a real click on The Confluence proves the live set moves."
+      },
+      "plan_digest": "d8219f6dd8b47224dadac9252075a3f46553836ec9da4c34b6444e72f42fd4b8"
+    },
+    {
+      "task_id": "cycle-03-portal-legibility",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/4] Implemented: pure livePortalPairs helper with three tests, is-live toggle plus beam-passing aria label, four pair colors, idle dim/live ring, forced-colors and reduced-motion handling, README and ADR-011",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794081508.2434657,
+      "timestamp_str": "2026-11-07 22:58:28",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-03-portal-legibility",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/4] Verified: npm test 76/76; aikit check 5/5; Long Way Home and Confluence before/after pairs show live vs idle gates; real splitter flip moves live set [2,2] to [1,1,2,2] and the 13-move clear lights all four pairs; 18/18 levels still at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794081508.6347594,
+      "timestamp_str": "2026-11-07 22:58:28",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-03-portal-legibility",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-03-portal-legibility' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794081519.5387433,
+      "timestamp_str": "2026-11-07 22:58:39",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]
