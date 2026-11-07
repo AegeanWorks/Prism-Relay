@@ -21,7 +21,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 11 | Levels / prism onboarding | done |
 | 12 | UI readability / mobile modal actions | done |
 | 13 | Progression UX / rank progress | done |
-| 14 | Game feel / last-move marker | next |
+| 14 | Game feel / last-move marker | done |
+| 15 | UI readability / endgame CTA | next |
 
 ---
 
@@ -1029,6 +1030,72 @@ console errors. Report: `.review/cycles/cycle-13/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(progression): show the next rank and remaining stars`.
+
+---
+
+## Cycle 14 - Game feel: the last rotated cell stays marked
+
+**Date**: 2026-11-08
+
+### FIND
+
+Opportunity/defect: after the 280ms `is-turning` bump, nothing persisted to identify the last changed
+piece. A probe on The Confluence after a real splitter click and a 450ms wait found `lastMoved: []`;
+the `is-turning` class never cleared (`turning: ["2,3"]`, then `["2,3","4,3"]`). On a 15-rotatable
+finale the player had to infer the last move from the beam alone, and the stale class was a state bug.
+
+Baseline: `.review/cycles/cycle-14/before-last-move-report.json` and `before-after-splitter.png`.
+
+### ANALYZE
+
+- Survivor: a persistent `is-last-moved` class on exactly one rotatable cell, moved on each rotation
+  and cleared on reset. It is a visual anchor without changing the beam or score.
+- Survivor: a thin cyan outline inside the existing cell gutter, so it does not cover the beam or the
+  piece and survives forced colors as Highlight.
+- Survivor: fix the stale `is-turning` class with a per-node timer that restarts on rapid clicks, so
+  the class reflects an active animation rather than every piece ever touched.
+- Killed: a new floating tooltip or label. It would obscure the board and add layout.
+- Killed: reusing `is-turning` as the persistent marker. It is an animation class and was already
+  stale; separating the concerns keeps both meaningful.
+- Killed: changing the audio or charge cue. This cycle is visual move memory only.
+
+### IMPLEMENT
+
+Files:
+- `src/ui/app.js`: `turnTimers` WeakMap; `is-last-moved` toggled on the clicked rotatable; 320ms
+  `is-turning` cleanup with timer reset; reset clears both classes and timers.
+- `src/styles.css`: `.cell.is-last-moved` inset outline; forced-colors Highlight mapping.
+- `README.md`, `.aikit/decisions.md` ADR-022.
+
+No engine, level, save or inventory change. The played probe is the reproducer; no new unit test.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, `/?level=the-confluence`, fresh storage, real clicks followed
+by a 450ms wait so the bump animation is over.
+
+| Pair | Before | After |
+|---|---|---|
+| Board after splitter (2,3) | `.review/cycles/cycle-14/before-after-splitter.png` | `.review/cycles/cycle-14/after-after-splitter.png` |
+| Board after mirror (4,3) | `.review/cycles/cycle-14/before-after-mirror.png` | `.review/cycles/cycle-14/after-after-mirror.png` |
+
+After: `lastMoved: ["2,3"]`, `turning: []`; then the mirror click moves it to `["4,3"]`; reset leaves
+both empty. The cyan outline is visible around the clicked cell in both board crops. Before: no
+outline and stale `turning` entries. Report: `.review/cycles/cycle-14/after-last-move-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-14/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 103 tests, 103 pass, 0 fail (interaction covered by the played probe).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(game): keep a marker on the last rotated cell`.
+
 
 
 

@@ -124,6 +124,7 @@ prism-relay/
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
 - **Prisms are taught in place.** Chambers whose only special piece is a fixed prism show the pass-through and two-fork rule in the side panel; combo chambers keep the splitter and portal notes without adding a third.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
+- **Last move stays marked.** The last rotated cell keeps a thin cyan outline until the next rotation or reset, while the 320ms rotation bump class clears itself.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.

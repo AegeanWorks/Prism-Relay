@@ -947,6 +947,11 @@ dd {
   -webkit-tap-highlight-color: transparent;
 }
 
+.cell.is-last-moved {
+  outline: 1px solid var(--beam-cyan);
+  outline-offset: -1px;
+}
+
 .cell::before {
   position: absolute;
   inset: 1px;
@@ -1845,6 +1850,10 @@ dd {
 
   .cell--portal.is-live .piece--portal {
     border-color: Highlight;
+  }
+
+  .cell.is-last-moved {
+    outline-color: Highlight;
   }
 }
 

@@ -50,6 +50,7 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const compactLayout = window.matchMedia("(max-width: 900px)");
 const BOARD_FOOT_RESERVE = 56;
 const chargeTimers = new WeakMap();
+const turnTimers = new WeakMap();
 
 const screens = new Map(
   ["title", "chambers", "game", "profile"].map((name) => [
@@ -829,6 +830,7 @@ function rotatePiece(x, y, element) {
   }
   for (const piece of state.rotatableCells) {
     piece.element.tabIndex = piece.element === element ? 0 : -1;
+    piece.element.classList.toggle("is-last-moved", piece.element === element);
   }
   if (cell.kind === "splitter") {
     audio.playSplit();
@@ -845,9 +847,21 @@ function rotatePiece(x, y, element) {
   if (feedback.portal) {
     audio.playPortal();
   }
+  const priorTurn = turnTimers.get(element);
+  if (priorTurn) {
+    clearTimeout(priorTurn);
+    turnTimers.delete(element);
+  }
   element.classList.remove("is-turning");
   void element.offsetWidth;
   element.classList.add("is-turning");
+  turnTimers.set(
+    element,
+    window.setTimeout(() => {
+      element.classList.remove("is-turning");
+      turnTimers.delete(element);
+    }, 320),
+  );
   updateBoard(beforeLit);
 }
 
@@ -867,7 +881,13 @@ function resetCurrentLevel() {
   state.preview = false;
   state.victoryPending = false;
   for (const piece of state.rotatableCells) {
+    const timer = turnTimers.get(piece.element);
+    if (timer) {
+      clearTimeout(timer);
+      turnTimers.delete(piece.element);
+    }
     piece.element.classList.remove("is-turning");
+    piece.element.classList.remove("is-last-moved");
   }
   updateBoard();
   audio.playUi();
