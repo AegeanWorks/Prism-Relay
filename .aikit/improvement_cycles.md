@@ -14,8 +14,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 04 | UI readability / compact HUD | done |
 | 05 | Progression and saves / future-version preservation | done |
 | 06 | Game feel / post-victory flow | done |
-| 07 | Progression UX / honest save status | next |
-| 08 | Game feel / charge feedback | planned |
+| 07 | Progression UX / honest save status | done |
+| 08 | Game feel / charge feedback | next |
 
 ---
 
@@ -508,6 +508,82 @@ console errors. Report: `.review/cycles/cycle-06/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(ux): keep a next chamber action after dismissing victory`.
+
+---
+
+## Cycle 07 - Progression UX: honest save status
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect: after cycle 05 made a newer-version record read-only, the UI still claimed success. With a
+version-2 record seeded, a real callsign save printed "Callsign saved." while localStorage still held
+`FUTURE`; choosing the Orbit sigil printed "Sigil updated." while the stored sigil remained `helix`;
+clearing First Light showed a normal 3-star victory with no warning while the result was not stored.
+
+Baseline: `.review/cycles/cycle-07/before-save-status-report.json`, plus
+`before-callsign-status.png`, `before-sigil-status.png` and `before-victory-status.png`.
+
+### ANALYZE
+
+- Survivor: check the actual `saveProgress` return in every profile write and report the real state.
+  The refusal path already exists; only the message ignores it.
+- Survivor: put the same warning on the victory card, where the player expects the result to be
+  stored.
+- Survivor: keep normal success copy unchanged so version-1 players see no new noise.
+- Killed: disabling profile inputs when the save is read-only. The player can still change the
+  session and see the immediate state; honest feedback is enough for this cycle.
+- Killed: a modal blocking every play when storage is unavailable. It would interrupt the game for a
+  condition that only affects persistence.
+- Killed: changing the save format or adding a quarantine path. Cycle 05 already keeps the record
+  intact; this is feedback only.
+
+### IMPLEMENT
+
+Failing-first: `tests/hints.test.js` could not import `saveStatusMessage`; the probe recorded the
+false success messages before the change.
+
+Files:
+- `src/ui/hints.js`: `saveStatusMessage(saved, success)` returns the success copy or "Changes are not
+  being stored."
+- `src/ui/app.js`: `saveCallsign`, `chooseSigil`, `toggleAllAudio`, `toggleMusic` and `toggleEffects`
+  use the real save result; `finishLevel` records `saveFailed`; `openVictoryModal` appends "Progress
+  for this run is not being stored." when it is set.
+- `tests/hints.test.js`: two status-copy cases.
+- `README.md`, `.aikit/decisions.md` ADR-015.
+
+No save-format, engine, level or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, version-2 record seeded in `localStorage`, profile opened at
+`?screen=profile`, callsign set to NOVA and saved, then Orbit selected; separate First Light clear.
+
+| Pair | Before | After |
+|---|---|---|
+| Callsign on a read-only save | `.review/cycles/cycle-07/before-callsign-status.png` ("Callsign saved.") | `.review/cycles/cycle-07/after-callsign-status.png` ("Changes are not being stored.") |
+| Sigil on a read-only save | `.review/cycles/cycle-07/before-sigil-status.png` ("Sigil updated.") | `.review/cycles/cycle-07/after-sigil-status.png` ("Changes are not being stored.") |
+| Victory on a read-only save | `.review/cycles/cycle-07/before-victory-status.png` (no warning) | `.review/cycles/cycle-07/after-victory-status.png` ("Progress for this run is not being stored.") |
+
+The after report still shows `storedVersion: 2`, `storedCallsign: FUTURE`, `storedSigil: helix` and
+`futureOnlySurvived: true`; the messages now match the storage. Normal control: a fresh version-1 save
+reports "Callsign saved." and stores NOVA (`after-normal-callsign-status.png`). Reports:
+`.review/cycles/cycle-07/before-save-status-report.json` and `after-save-status-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-07/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 87 tests, 87 pass, 0 fail (was 85; +2 status-copy cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged from cycle 06; no new handle.
+- `node --check src/ui/app.js`, `src/ui/hints.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(ux): report refused saves instead of claiming success`.
+
 
 
 

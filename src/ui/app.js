@@ -34,7 +34,7 @@ import {
   updateProfile,
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
-import { parHint, postVictoryAction } from "./hints.js";
+import { parHint, postVictoryAction, saveStatusMessage } from "./hints.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -671,7 +671,7 @@ function finishLevel() {
     stars,
     next?.id ?? null,
   );
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
   state.result = {
     stars,
     moves: state.session.moves,
@@ -682,6 +682,7 @@ function finishLevel() {
     episodeComplete,
     episodeNumber: episode?.number ?? "I",
     preview: false,
+    saveFailed: !saved,
   };
   updateGameView();
   updateTitleStats();
@@ -962,6 +963,9 @@ function openVictoryModal() {
         label: "Return to chambers",
         run: () => showScreen("chambers"),
       };
+  const saveWarning = result.saveFailed
+    ? `<p class="modal__fine">Progress for this run is not being stored.</p>`
+    : "";
   openModal({
     kind: "victory",
     kicker: result.episodeComplete ? "Episode complete" : "Chamber complete",
@@ -975,6 +979,7 @@ function openVictoryModal() {
         <div><dt>Par</dt><dd>${level.par}</dd></div>
         <div><dt>Best</dt><dd>${result.bestMoves}</dd></div>
       </dl>
+      ${saveWarning}
     `,
     primary: nextAction,
     secondary: { label: "Replay", run: () => startLevel(level.id) },
@@ -1061,21 +1066,21 @@ function setProfileStatus(message) {
 function saveCallsign(event) {
   event.preventDefault();
   state.progress = updateProfile(state.progress, { callsign: elements.profileCallsign.value });
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
   renderProfile();
   updateTitleStats();
   updateTopbarStatus();
-  setProfileStatus("Callsign saved.");
+  setProfileStatus(saveStatusMessage(saved, "Callsign saved."));
   audio.playUi();
 }
 
 function chooseSigil(sigil) {
   const draft = elements.profileCallsign.value;
   state.progress = updateProfile(state.progress, { sigil });
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
   renderProfile();
   elements.profileCallsign.value = draft;
-  setProfileStatus("Sigil updated.");
+  setProfileStatus(saveStatusMessage(saved, "Sigil updated."));
   audio.playUi();
 }
 
@@ -1117,7 +1122,10 @@ function toggleAllAudio() {
   const enable = !(state.progress.sound || state.progress.music);
   state.progress = setSound(state.progress, enable);
   state.progress = setMusic(state.progress, enable);
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
+  if (!saved && state.screen === "profile") {
+    setProfileStatus(saveStatusMessage(false, ""));
+  }
   if (enable) {
     state.audioUnlocked = true;
     audio.setEnabled(true);
@@ -1140,7 +1148,10 @@ function toggleAllAudio() {
 
 function toggleMusic(enabled) {
   state.progress = setMusic(state.progress, enabled);
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
+  if (!saved && state.screen === "profile") {
+    setProfileStatus(saveStatusMessage(false, ""));
+  }
   audio.setMusicEnabled(state.progress.music);
   if (state.progress.music) {
     unlockAudio();
@@ -1153,7 +1164,10 @@ function toggleMusic(enabled) {
 
 function toggleEffects(enabled) {
   state.progress = setSound(state.progress, enabled);
-  saveProgress(storage, state.progress);
+  const saved = saveProgress(storage, state.progress);
+  if (!saved && state.screen === "profile") {
+    setProfileStatus(saveStatusMessage(false, ""));
+  }
   audio.setEnabled(state.progress.sound);
   updateSoundButton();
   if (state.progress.sound) {

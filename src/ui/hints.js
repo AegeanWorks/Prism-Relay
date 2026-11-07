@@ -12,3 +12,7 @@ export function postVictoryAction(result) {
   }
   return { label: "Episode index", screen: "chambers" };
 }
+
+export function saveStatusMessage(saved, success) {
+  return saved ? success : "Changes are not being stored.";
+}

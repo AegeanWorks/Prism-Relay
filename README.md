@@ -58,7 +58,7 @@ The profile stores a callsign (up to 18 characters), one of four sigils, rank, c
 
 Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M. A rotation also reports its consequence: a two-note charge when a receiver lights, and a gate sweep when a beam's portal transit changes.
 
-Progress is stored in `localStorage` under `prism-relay.progress.v1`. A missing or corrupt record resets safely; an older record without profile, music or episode fields keeps its stars and gains defaults. Sequential unlocks are repaired from completed chambers, so a save that finished Ignition opens Refraction automatically. A record from a newer save version is left untouched rather than overwritten.
+Progress is stored in `localStorage` under `prism-relay.progress.v1`. A missing or corrupt record resets safely; an older record without profile, music or episode fields keeps its stars and gains defaults. Sequential unlocks are repaired from completed chambers, so a save that finished Ignition opens Refraction automatically. A record from a newer save version is left untouched rather than overwritten. When a write is refused, the profile and the victory card say that changes are not being stored instead of claiming success.
 
 ## What's Inside
 
@@ -113,7 +113,7 @@ prism-relay/
 - **Pure engine first.** `engine.js` knows nothing about the DOM. `traceBeams` returns immutable paths and lit-receiver keys, so tests and the SVG renderer share one source of truth.
 - **Solver-backed par.** Every chamber is checked at test time by enumerating every two-state rotatable, including splitters. The advertised par must equal the true minimum move count.
 - **Segmented portal paths.** A portal ends one beam segment and starts another at its twin, so the renderer never draws a false line across unrelated tiles.
-- **Additive saves.** The save version stays at 1. New fields are optional and normalized, while sequential unlocks are reconstructed from completed chambers instead of discarding old progress. A record from a newer version is refused for writing and left byte-for-byte intact, so an older build cannot destroy a future save.
+- **Additive saves.** The save version stays at 1. New fields are optional and normalized, while sequential unlocks are reconstructed from completed chambers instead of discarding old progress. A record from a newer version is refused for writing and left byte-for-byte intact, so an older build cannot destroy a future save; refused writes are reported in the profile status and on the victory card.
 - **Token-only styling.** Raw colors and font values live in `src/theme.css`; every other line uses CSS custom properties.
 - **Accessible by construction.** The board is a group of real buttons with labels, roving keyboard focus, a live status line and a native `<dialog>`; buttons and topbar controls meet 3:1 boundaries and 44px coarse-pointer targets, while dense board cells stay at least 24px.
 - **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.

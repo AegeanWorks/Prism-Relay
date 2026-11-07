@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-06-post-victory",
+    "task_id": "cycle-07-save-status",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794084295.5044818,
+    "updated_at": 1794085202.1917045,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794084321.7839708
+    "completed_at": 1794085218.8543222
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-02-audio-feedback",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Plan: give beam-state changes audible feedback with a pure cue decision, a receiver-charge chime, and the dead portal cue wired to real transits",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794079389.4408293,
-      "timestamp_str": "2026-11-07 22:23:09",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "A played run shows the core progress events are silent: rotating a mirror that charges a receiver on Split Decision plays only the 660Hz rotate click, and flipping the Detour splitter that changes the portal transit plays only the splitter pair, even though audio.js already ships playPortal() unused. The player hears the action but not what it did.",
-        "benefits": "Receiver progress and portal transits become audible without new assets or dependencies; the existing synthesized portal cue stops being dead code; action and consequence sounds layer instead of replacing each other.",
-        "risks": "contract: cellNear moves from app.js into the pure engine; dependency: none, WebAudio only; concurrency: several tones can start in one gesture, so gains must stay low; state: no save change, no visual or inventory change; tests run without AudioContext.",
-        "mitigation": "Pure feedbackFor/portalTransitKey module with unit tests, engine-level cellNear tests, a two-note charge at low gain, and a Playwright run that counts actual oscillator frequencies before and after one real click on Split Decision, Detour and Wormhole."
-      },
-      "plan_digest": "87da1b1adf01217b18cc59c8772e4420f2c65ba97493022e2eb754bf7f749c09"
-    },
-    {
-      "task_id": "cycle-02-audio-feedback",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/4] Implemented: engine-level cellNear export, pure cues module (portalTransitKey/feedbackFor) with 10 tests, two-note playCharge, app wiring for charge and portal consequence cues, README and ADR-010",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794080345.1398761,
-      "timestamp_str": "2026-11-07 22:39:05",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-02-audio-feedback",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Verified: npm test 73/73; aikit check 5/5; real clicks add 880/1318.5Hz on receiver charge and 330/660Hz on portal transit while no-change rotations stay silent; 18/18 levels still solved at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794080345.581634,
-      "timestamp_str": "2026-11-07 22:39:05",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-02-audio-feedback",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-02-audio-feedback' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794080367.150752,
-      "timestamp_str": "2026-11-07 22:39:27",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-03-portal-legibility",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794084321.7839735,
       "timestamp_str": "2026-11-07 23:45:21",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-07-save-status",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: make save feedback honest in the profile and the victory modal when a write is refused or fails",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794084603.3225963,
+      "timestamp_str": "2026-11-07 23:50:03",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "With a read-only future-version save, editing the callsign reports 'Callsign saved.' and choosing a sigil reports 'Sigil updated.' although localStorage still holds FUTURE/helix; clearing First Light shows a normal 3-star victory with no warning while the result is not stored. The player is told progress happened when it did not.",
+        "benefits": "Every profile write and every chamber clear reports its real persistence state; a future-version or quota-restricted save can no longer masquerade as stored progress, while normal v1 writes keep their success messages.",
+        "risks": "contract: victory result gains saveFailed and the modal body gains a warning; dependency: none; concurrency: none; state: no save-format change, still read-only for newer versions; layout: one extra fine-print line in the victory modal.",
+        "mitigation": "Pure saveStatusMessage(saved, success) cases, source-verified profile status after real Save and sigil clicks, a future-save victory warning, a normal-v1 success control, and the 18-level regression."
+      },
+      "plan_digest": "5ec4bd6301eea5e31a58b59a63224b795ecc1714751b78322d4e0102661c0867"
+    },
+    {
+      "task_id": "cycle-07-save-status",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: pure saveStatusMessage helper with two tests, real save-result checks in profile callsign/sigil/audio toggles, saveFailed victory result plus modal warning, README and ADR-015",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794085201.9054947,
+      "timestamp_str": "2026-11-08 00:00:01",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-07-save-status",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 87/87; aikit check 5/5; read-only future save now reports 'Changes are not being stored.' for callsign/sigil and adds the victory warning while stored FUTURE/helix survive; normal v1 save still reports success and stores NOVA; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794085202.1917045,
+      "timestamp_str": "2026-11-08 00:00:02",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-07-save-status",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-07-save-status' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794085218.8543246,
+      "timestamp_str": "2026-11-08 00:00:18",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

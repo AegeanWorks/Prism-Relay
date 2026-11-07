@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parHint, postVictoryAction } from "../src/ui/hints.js";
+import { parHint, postVictoryAction, saveStatusMessage } from "../src/ui/hints.js";
 
 test("a one-move par reads as a singular move", () => {
   assert.equal(parHint(1), "Par is 1 move. Every rotation counts.");
@@ -32,4 +32,12 @@ test("the finale offers the episode index instead of a missing next level", () =
 
 test("no victory result has no post-victory action", () => {
   assert.equal(postVictoryAction(null), null);
+});
+
+test("a completed save reports the action's success copy", () => {
+  assert.equal(saveStatusMessage(true, "Callsign saved."), "Callsign saved.");
+});
+
+test("a refused save reports that changes are not stored", () => {
+  assert.equal(saveStatusMessage(false, "Callsign saved."), "Changes are not being stored.");
 });
