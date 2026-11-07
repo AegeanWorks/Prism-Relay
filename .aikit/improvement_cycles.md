@@ -16,7 +16,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 06 | Game feel / post-victory flow | done |
 | 07 | Progression UX / honest save status | done |
 | 08 | Game feel / live star pace | done |
-| 09 | Accessibility / reduced motion and forced colors | next |
+| 09 | Accessibility / star state without color | done |
+| 10 | Game feel / receiver charge impact | next |
 
 ---
 
@@ -659,6 +660,79 @@ console errors. Report: `.review/cycles/cycle-08/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(ui): show live star pace in the moves HUD`.
+
+---
+
+## Cycle 09 - Accessibility: star state without color
+
+**Date**: 2026-11-08
+
+### FIND
+
+Defect: in forced-colors emulation the three HUD stars all rendered the filled `★` glyph and the
+same computed `rgb(0, 0, 0)`, while the state was actually `earned: [true, true, false]`. The same
+markup feeds the chamber cards and victory card, so star state vanished in Windows High Contrast and
+was weak for color-impaired players. Reduced motion was audited too: the beam animation already
+collapses from 1.35s to 0.001s, so no motion defect survives.
+
+Baseline: `.review/cycles/cycle-09/before-forced-colors-report.json` and
+`before-hud-forced-colors.png` (three identical filled glyphs).
+
+### ANALYZE
+
+- Survivor: encode star state in shape: filled `★` for earned, outlined `☆` for unearned. Shape
+  survives any color override and is readable at the 12px HUD size.
+- Survivor: move the shared markup into a pure module so the HUD, cards and modal all get the same
+  behavior and the glyph contract is testable.
+- Survivor: keep the existing color and aria labels; the glyph is an additional channel, not a
+  replacement.
+- Killed: a forced-colors-only CSS rule. The same glyph problem exists in normal mode for anyone who
+  cannot separate gold from grey; shape is the better fix.
+- Killed: reducing motion further. The audit shows the global 1ms rule already disables the beam,
+  portal ring and screen transitions; changing it would churn a correct guard.
+- Killed: changing the star count or scoring. `starsFor` and all totals are correct.
+
+### IMPLEMENT
+
+Failing-first: `tests/stars.test.js` failed with `ERR_MODULE_NOT_FOUND` before `src/ui/stars.js`.
+
+Files:
+- `src/ui/stars.js` (new): `starsMarkup(count)` emits filled earned glyphs and outlined unearned
+  glyphs with the existing classes; `starLabel(count)` keeps the count copy.
+- `src/ui/app.js`: imports the two helpers and drops the local copies.
+- `tests/stars.test.js` (new, 4 cases): two earned, three earned, zero earned, labels.
+- `README.md`, `.aikit/decisions.md` ADR-017.
+
+No CSS, engine, level, save or UI-inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, Double Down at moves 5 (five real splitter clicks), then
+`emulate_media(forced_colors="active")` with no other state change.
+
+| Pair | Before | After |
+|---|---|---|
+| HUD, forced colors | `.review/cycles/cycle-09/before-hud-forced-colors.png` (★★★ all black) | `.review/cycles/cycle-09/after-hud-forced-colors.png` (★★☆ all black) |
+| Whole game, normal colors | `.review/cycles/cycle-09/before-double-down-normal.png` | `.review/cycles/cycle-09/after-double-down-normal.png` |
+
+After forced-colors report: glyphs `["★","★","☆"]`, earned `[true,true,false]`, all colors
+`rgb(0,0,0)`; shape alone carries the state. Normal report: two gold `rgb(255,211,110)` filled stars
+and one grey `rgb(127,139,174)` outline. Reduce mode: beam animation `0.001s`. Reports:
+`.review/cycles/cycle-09/before-forced-colors-report.json` and `after-forced-colors-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-09/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 91 tests, 91 pass, 0 fail (was 87; +4 star-markup cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js`, `src/ui/stars.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(a11y): outline unearned stars so state survives forced colors`.
+
 
 
 

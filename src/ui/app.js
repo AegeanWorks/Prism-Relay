@@ -35,6 +35,7 @@ import {
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
 import { parHint, postVictoryAction, saveStatusMessage } from "./hints.js";
+import { starLabel, starsMarkup } from "./stars.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -217,16 +218,6 @@ function nextPlayableLevel() {
       (level) => isUnlocked(state.progress, level.id) && !state.progress.best[level.id],
     ) ?? LEVELS[0]
   );
-}
-
-function starsMarkup(count) {
-  return [1, 2, 3]
-    .map((index) => `<span class="star${index <= count ? " is-earned" : ""}" aria-hidden="true">★</span>`)
-    .join("");
-}
-
-function starLabel(count) {
-  return count === 0 ? "No stars yet" : `${count} of 3 stars`;
 }
 
 function renderChambers() {

@@ -92,9 +92,10 @@ prism-relay/
 │   │   ├── app.js             <- screens, board renderer, profile, input, dialogs
 │   │   ├── audio.js           <- generated effects and ambient music, no assets
 │   │   ├── cues.js            <- state-derived charge and portal sound decisions
-│   │   ├── hints.js           <- pluralized par and scoring copy
+│   │   ├── hints.js           <- pluralized par, save-status and post-victory copy
 │   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
-│   │   └── progress.js        <- versioned saves, profile, rank and statistics
+│   │   ├── progress.js        <- versioned saves, profile, rank and statistics
+│   │   └── stars.js           <- filled and outlined star markup and labels
 │   ├── styles.css             <- component styling using theme tokens
 │   └── theme.css              <- the only file with raw color and font values
 └── tests/
@@ -104,7 +105,8 @@ prism-relay/
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
     ├── layout.test.js         <- viewport fit arithmetic for tall chambers
     ├── cues.test.js           <- charge and portal transit cue decisions
-    ├── hints.test.js          <- singular and plural par copy
+    ├── hints.test.js          <- par, save-status and post-victory copy
+    ├── stars.test.js          <- filled and outlined star markup
     └── ui.test.js             <- screen, control and manifest contract
 ```
 
@@ -120,6 +122,7 @@ prism-relay/
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
+- **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.
 - **No solved dead ends.** If the victory dialog is dismissed, the game foot keeps a Next chamber action (or Episode index on the finale) until the player restarts or leaves.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
