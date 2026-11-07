@@ -33,7 +33,7 @@ import {
   statsFor,
   updateProfile,
 } from "./progress.js";
-import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
+import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "./cues.js";
 import { parHint, postVictoryAction, saveStatusMessage } from "./hints.js";
 import { starLabel, starsMarkup } from "./stars.js";
 
@@ -48,6 +48,7 @@ const storage = (() => {
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const compactLayout = window.matchMedia("(max-width: 900px)");
 const BOARD_FOOT_RESERVE = 56;
+const chargeTimers = new WeakMap();
 
 const screens = new Map(
   ["title", "chambers", "game", "profile"].map((name) => [
@@ -498,7 +499,7 @@ function traceSession() {
   return trace;
 }
 
-function updateBoard() {
+function updateBoard(previousLit = null) {
   if (!state.session || !state.level) {
     return;
   }
@@ -519,6 +520,11 @@ function updateBoard() {
       node.classList.toggle("is-lit", lit);
       node.setAttribute("aria-label", lit ? "Receiver, charged." : "Receiver, waiting for light.");
     }
+  }
+  if (previousLit) {
+    markChargedReceivers(previousLit, trace.lit);
+  } else {
+    clearChargeBursts();
   }
   const livePairs = new Set(livePortalPairs(state.session.board, trace.paths));
   for (const portal of state.session.board.portals) {
@@ -651,6 +657,52 @@ function updateGameView() {
   }
 }
 
+function markChargedReceivers(previousLit, lit) {
+  const charged = new Set(newlyLitKeys(previousLit, lit));
+  for (const receiver of state.session.board.receivers) {
+    const node = state.cellElements.get(`${receiver.x},${receiver.y}`);
+    if (!node) {
+      continue;
+    }
+    const timer = chargeTimers.get(node);
+    if (timer) {
+      clearTimeout(timer);
+      chargeTimers.delete(node);
+    }
+    node.classList.remove("is-charging");
+    if (!charged.has(`${receiver.x},${receiver.y}`)) {
+      continue;
+    }
+    void node.offsetWidth;
+    node.classList.add("is-charging");
+    chargeTimers.set(
+      node,
+      window.setTimeout(() => {
+        node.classList.remove("is-charging");
+        chargeTimers.delete(node);
+      }, 600),
+    );
+  }
+}
+
+function clearChargeBursts() {
+  if (!state.session) {
+    return;
+  }
+  for (const receiver of state.session.board.receivers) {
+    const node = state.cellElements.get(`${receiver.x},${receiver.y}`);
+    if (!node) {
+      continue;
+    }
+    const timer = chargeTimers.get(node);
+    if (timer) {
+      clearTimeout(timer);
+      chargeTimers.delete(node);
+    }
+    node.classList.remove("is-charging");
+  }
+}
+
 function finishLevel() {
   if (state.completed || !state.session || !state.level) {
     return;
@@ -776,6 +828,7 @@ function rotatePiece(x, y, element) {
     return;
   }
   const cell = state.session.board.cells[y]?.[x];
+  const beforeLit = new Set(state.session.litKeys ?? []);
   const before = {
     lit: state.session.litCount,
     portalKey: portalTransitKey(state.session.board, state.session.paths),
@@ -805,7 +858,7 @@ function rotatePiece(x, y, element) {
   element.classList.remove("is-turning");
   void element.offsetWidth;
   element.classList.add("is-turning");
-  updateBoard();
+  updateBoard(beforeLit);
 }
 
 function resetCurrentLevel() {

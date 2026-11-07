@@ -8,7 +8,7 @@ import {
   traceBeams,
 } from "../src/game/engine.js";
 import { levelById } from "../src/game/levels.js";
-import { feedbackFor, livePortalPairs, portalTransitKey } from "../src/ui/cues.js";
+import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "../src/ui/cues.js";
 
 test("a segment that ends on a portal identifies the transit gate", () => {
   const board = parseLevel({ id: "portal", rows: [">.1T", "..1."] });
@@ -86,6 +86,16 @@ test("no change produces no cue", () => {
     feedbackFor({ lit: 1, portalKey: "2,5" }, { lit: 1, portalKey: "2,5" }),
     { charge: false, portal: false },
   );
+});
+
+test("newly lit receivers are the keys added since the previous trace", () => {
+  assert.deepEqual(newlyLitKeys(new Set(), new Set(["1,1", "2,2"])), ["1,1", "2,2"]);
+  assert.deepEqual(newlyLitKeys(new Set(["1,1"]), new Set(["1,1", "2,2"])), ["2,2"]);
+});
+
+test("removed receivers are not newly lit", () => {
+  assert.deepEqual(newlyLitKeys(new Set(["1,1", "2,2"]), new Set(["2,2"])), []);
+  assert.deepEqual(newlyLitKeys(new Set(["1,1"]), new Set(["1,1"])), []);
 });
 
 test("missing state is treated as empty instead of throwing", () => {

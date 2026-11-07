@@ -30,6 +30,10 @@ export function livePortalPairs(board, paths = []) {
   return [...pairs].sort();
 }
 
+export function newlyLitKeys(before = new Set(), after = new Set()) {
+  return [...after].filter((key) => !before.has(key));
+}
+
 export function feedbackFor(before = {}, after = {}) {
   return {
     charge: (after?.lit ?? 0) > (before?.lit ?? 0),

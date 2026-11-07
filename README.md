@@ -120,6 +120,7 @@ prism-relay/
 - **Accessible by construction.** The board is a group of real buttons with labels, roving keyboard focus, a live status line and a native `<dialog>`; buttons and topbar controls meet 3:1 boundaries and 44px coarse-pointer targets, while dense board cells stay at least 24px.
 - **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
+- **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.

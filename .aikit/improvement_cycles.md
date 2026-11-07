@@ -17,7 +17,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 07 | Progression UX / honest save status | done |
 | 08 | Game feel / live star pace | done |
 | 09 | Accessibility / star state without color | done |
-| 10 | Game feel / receiver charge impact | next |
+| 10 | Game feel / receiver charge impact | done |
+| 11 | Levels / prism onboarding | next |
 
 ---
 
@@ -732,6 +733,83 @@ console errors. Report: `.review/cycles/cycle-09/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(a11y): outline unearned stars so state survives forced colors`.
+
+---
+
+## Cycle 10 - Game feel: receiver charge impact
+
+**Date**: 2026-11-08
+
+### FIND
+
+Opportunity: a receiver that first charges played the two-note cue and started the persistent pulse,
+but the visual connection itself was only a border/glow swap. A real Split Decision click, captured
+120ms later, measured `charging: 0`, `ringAnimation: none`, receivers 1/2 and moves 1. There was no
+transient impact at the cell where the beam arrived.
+
+Baseline: `.review/cycles/cycle-10/before-charge-burst-report.json` and `before-receiver-zoom.png`.
+
+### ANALYZE
+
+- Survivor: derive the newly lit receiver keys from the previous and current traces and add a
+  short-lived class only to those cells. The mechanic (which receivers changed) is already proven by
+  the trace.
+- Survivor: use a per-node timer so a rapid re-charge restarts the ring instead of being cleared by
+  the previous timer.
+- Survivor: a white ring with a short hold phase reads clearly against the persistent cyan lit ring
+  and survives the screenshot latency; a purely fading ring was too easy to miss.
+- Survivor: clear the class immediately when the board is reset or a fresh render replaces the
+  previous-lit context.
+- Killed: a particle system or canvas overlay. A single CSS ring is enough and adds no asset or
+  render loop.
+- Killed: a persistent extra glow. The lit receiver already has one; the value is the transient.
+- Killed: changing the audio cue or star pace. Both already fire on the same event.
+
+### IMPLEMENT
+
+Failing-first: `tests/cues.test.js` imported `newlyLitKeys` before it existed.
+
+Files:
+- `src/ui/cues.js`: `newlyLitKeys(before, after)` returns the keys added since the previous trace.
+- `src/ui/app.js`: `updateBoard(previousLit = null)`; `rotatePiece` captures the current lit set and
+  passes it; `markChargedReceivers` adds `is-charging` and clears it after 600ms through a WeakMap of
+  timers; `clearChargeBursts` handles start/reset.
+- `src/styles.css`: white `::after` ring, 600ms linear `charge-burst` keyframes with a hold phase,
+  forced-colors Highlight border.
+- `tests/cues.test.js`: two newly-lit key cases.
+- `README.md`, `.aikit/decisions.md` ADR-018.
+
+No engine, level, save or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157, 1440x900, Split Decision fresh, one real click on mirror (4,2) to
+charge the first of two receivers, capture 120ms later.
+
+| Pair | Before | After |
+|---|---|---|
+| Board at 120ms | `.review/cycles/cycle-10/before-charge-board-120ms.png` | `.review/cycles/cycle-10/after-charge-board-120ms.png` |
+| Receiver zoom | `.review/cycles/cycle-10/before-receiver-zoom.png` | `.review/cycles/cycle-10/after-receiver-zoom.png` |
+
+Before: only the persistent cyan lit ring. After: a white shockwave ring expanding past the cell.
+Report: `during120ms.charging = 1`, `ringAnimation = "charge-burst"`, moves 1, receivers 1/2; by
+820ms `charging = 0` and the persistent lit ring remains. Charging then resetting within the burst
+window yields `charging: 0`, `lit: 0`, `moves: 0`. Reports:
+`.review/cycles/cycle-10/before-charge-burst-report.json` and `after-charge-burst-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-10/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 93 tests, 93 pass, 0 fail (was 91; +2 newly-lit key cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js`, `src/ui/cues.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(game): burst a ring when a receiver first charges`.
+
 
 
 

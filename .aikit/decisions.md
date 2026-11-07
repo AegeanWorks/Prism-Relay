@@ -140,3 +140,10 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Decision**: Move `starsMarkup` and `starLabel` into `src/ui/stars.js`. Earned stars keep the filled `★`; unearned stars render the outlined `☆` while retaining the same `is-earned` class and aria-hidden glyphs. The outer row keeps its count label. Pin the markup with four pure tests for 0, 2 and 3 stars plus labels.
 - **Consequences**: Forced-colors now reads `★★☆` with all three glyphs black, and normal mode reads two gold filled plus one grey outlined star. The change automatically reaches the HUD pace, chamber cards and victory cards because they share `starsMarkup`. No score, save, engine, level or inventory change; `npm test` moves 87 to 91 with four star-markup cases.
 
+### ADR-018: A receiver gets a one-shot ring burst when it first charges
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Charging a receiver played the charge cue and started the persistent pulse, but the visual connection itself was only a border/glow swap. A probe on Split Decision 120ms after the charging click found no transient class or ring (`charging: 0`, `ringAnimation: none`) while the receiver was already 1/2 lit.
+- **Decision**: Add `newlyLitKeys(before, after)` to `cues.js` and an optional previous-lit set to `updateBoard`. `markChargedReceivers` adds `is-charging` only to receivers added by that rotation, uses a per-node `WeakMap` timer to clear it after 600ms, and restarts the animation with a reflow if the same receiver charges again. `clearChargeBursts` handles start/reset. CSS draws a white `::after` ring with a 600ms linear `charge-burst` scale/fade, gets a Highlight border in forced colors, and collapses under the existing reduced-motion rule.
+- **Consequences**: 120ms after a real Split Decision click, exactly one receiver has `is-charging` and the `charge-burst` animation; the class is gone by 820ms. Charging then resetting within the burst window clears the class at once and leaves moves 0 and receivers 0/1. The persistent lit state is unchanged. No engine, level, save or inventory change; `npm test` moves 91 to 93 with newly-lit key cases.
+
