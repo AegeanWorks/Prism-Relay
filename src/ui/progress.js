@@ -201,24 +201,36 @@ export function statsFor(progress) {
   };
 }
 
+export const RANKS = Object.freeze([
+  Object.freeze({ stars: 0, name: "Cadet" }),
+  Object.freeze({ stars: 8, name: "Operator" }),
+  Object.freeze({ stars: 19, name: "Weaver" }),
+  Object.freeze({ stars: 32, name: "Architect" }),
+  Object.freeze({ stars: 44, name: "Lumen" }),
+  Object.freeze({ stars: TOTAL_STARS, name: "Relay Master" }),
+]);
+
 export function rankFor(stars) {
   const value = Number.isFinite(stars) ? Math.max(0, Math.floor(stars)) : 0;
-  if (value >= TOTAL_STARS) {
-    return "Relay Master";
+  let name = RANKS[0].name;
+  for (const rank of RANKS) {
+    if (value >= rank.stars) {
+      name = rank.name;
+    }
   }
-  if (value >= 44) {
-    return "Lumen";
-  }
-  if (value >= 32) {
-    return "Architect";
-  }
-  if (value >= 19) {
-    return "Weaver";
-  }
-  if (value >= 8) {
-    return "Operator";
-  }
-  return "Cadet";
+  return name;
+}
+
+export function rankProgress(stars) {
+  const value = Number.isFinite(stars) ? Math.max(0, Math.floor(stars)) : 0;
+  const next = RANKS.find((rank) => rank.stars > value) ?? null;
+  return {
+    current: rankFor(value),
+    next: next?.name ?? null,
+    remaining: next ? next.stars - value : 0,
+    target: next?.stars ?? RANKS[RANKS.length - 1].stars,
+    stars: value,
+  };
 }
 
 export function isUnlocked(progress, levelId) {

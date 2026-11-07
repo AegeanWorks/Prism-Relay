@@ -10,6 +10,7 @@ import {
   normalizeCallsign,
   normalizeProgress,
   rankFor,
+  rankProgress,
   recordResult,
   saveProgress,
   setMusic,
@@ -209,6 +210,46 @@ test("rank thresholds cover the full star range", () => {
   assert.equal(rankFor(44), "Lumen");
   assert.equal(rankFor(54), "Relay Master");
   assert.equal(rankFor(100), "Relay Master");
+});
+
+test("rankProgress names the next rank and remaining stars", () => {
+  assert.deepEqual(rankProgress(0), {
+    current: "Cadet",
+    next: "Operator",
+    remaining: 8,
+    target: 8,
+    stars: 0,
+  });
+  assert.deepEqual(rankProgress(7), {
+    current: "Cadet",
+    next: "Operator",
+    remaining: 1,
+    target: 8,
+    stars: 7,
+  });
+  assert.deepEqual(rankProgress(8), {
+    current: "Operator",
+    next: "Weaver",
+    remaining: 11,
+    target: 19,
+    stars: 8,
+  });
+});
+
+test("rankProgress caps at Relay Master", () => {
+  assert.deepEqual(rankProgress(54), {
+    current: "Relay Master",
+    next: null,
+    remaining: 0,
+    target: 54,
+    stars: 54,
+  });
+  assert.equal(rankProgress(100).current, "Relay Master");
+});
+
+test("rankProgress treats invalid stars as zero", () => {
+  assert.deepEqual(rankProgress(Number.NaN), rankProgress(0));
+  assert.deepEqual(rankProgress(-3), rankProgress(0));
 });
 
 test("statsFor derives completion, perfect runs, stars and moves", () => {

@@ -20,7 +20,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 10 | Game feel / receiver charge impact | done |
 | 11 | Levels / prism onboarding | done |
 | 12 | UI readability / mobile modal actions | done |
-| 13 | Progression UX / rank progress | next |
+| 13 | Progression UX / rank progress | done |
+| 14 | Game feel / last-move marker | next |
 
 ---
 
@@ -960,6 +961,75 @@ console errors. Report: `.review/cycles/cycle-12/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(ui): pin modal actions above the phone fold`.
+
+---
+
+## Cycle 13 - Progression UX: next rank and stars remaining
+
+**Date**: 2026-11-08
+
+### FIND
+
+Opportunity: the profile named the current rank but not the next threshold. A seeded profile at 10
+stars and one at 18 stars both showed only "OPERATOR"; the distance to Weaver lived only in the code.
+The profile had a natural empty line under the rank and no use for the next threshold.
+
+Baseline (pre-cycle worktree at 75b386c): `.review/cycles/cycle-13/before-rank-report.json` and
+`before-profile-10-stars.png` — rank Operator, `next: null`.
+
+### ANALYZE
+
+- Survivor: derive the next rank from a single shared threshold table and show the stars remaining in
+  the profile. No save field is needed; `statsFor` already computes total stars.
+- Survivor: keep `rankFor` as the authority by reading the same table, so the displayed rank and the
+  progress line cannot disagree.
+- Survivor: one short mono line under the rank, matching the existing profile typography.
+- Killed: a rank progress bar. The line is clearer at this size and avoids new layout blocks.
+- Killed: computing the next rank in the episode cards or title. The profile is where rank lives.
+- Killed: changing thresholds or the 54-star cap. Existing rank tests already pin them.
+
+### IMPLEMENT
+
+Failing-first: `tests/progress.test.js` imported `rankProgress` before it existed, and `tests/ui.test.js`
+failed on the missing `profile-rank-next` cue.
+
+Files:
+- `src/ui/progress.js`: frozen `RANKS` table, `rankFor` now reads it, new `rankProgress(stars)`.
+- `index.html`: `profile-rank-next` line under the rank.
+- `src/ui/app.js`: `renderProfile` sets the current rank and the next/remaining copy.
+- `src/styles.css`: muted mono style for the line.
+- `tests/progress.test.js` (+3 cases), `tests/ui.test.js` (cue contract).
+- `README.md`, `.aikit/decisions.md` ADR-021.
+
+No engine, level, save or interaction change.
+
+### PROOF
+
+Before capture came from a detached worktree at the cycle-12 commit (`75b386c`) served on a separate
+port; after capture came from the working tree. Same save, URL, viewport and browser.
+
+| Pair | Before | After |
+|---|---|---|
+| Profile with 10 stars (Operator) | `.review/cycles/cycle-13/before-profile-10-stars.png` | `.review/cycles/cycle-13/after-profile-10-stars.png` |
+| Profile after a fresh First Light clear | `.review/cycles/cycle-13/before-profile-after-first-light.png` | `.review/cycles/cycle-13/after-profile-after-first-light.png` |
+
+Before report: seeded rank Operator, `next: null`; played rank Cadet, `next: null`. After report:
+seeded "OPERATOR / 9 STARS TO WEAVER" at 10/54 stars; played "CADET / 5 STARS TO OPERATOR" at 3/54
+stars. Reports: `before-rank-report.json` and `after-rank-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-13/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 103 tests, 103 pass, 0 fail (was 100; +3 rank-progress cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `cue: profile-rank-next`; no other inventory drift.
+- `node --check src/ui/app.js`, `src/ui/progress.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(progression): show the next rank and remaining stars`.
+
 
 
 

@@ -25,7 +25,7 @@ import {
 import {
   isUnlocked,
   loadProgress,
-  rankFor,
+  rankProgress,
   recordResult,
   saveProgress,
   setMusic,
@@ -99,6 +99,7 @@ const elements = {
   profileSigil: document.getElementById("profile-sigil"),
   profileCallsignDisplay: document.getElementById("profile-callsign-display"),
   profileRank: document.getElementById("profile-rank"),
+  profileRankNext: document.getElementById("profile-rank-next"),
   profileForm: document.getElementById("profile-form"),
   profileCallsign: document.getElementById("profile-callsign"),
   profileSaveStatus: document.getElementById("profile-save-status"),
@@ -1040,9 +1041,15 @@ function openProfile() {
 function renderProfile() {
   const stats = statsFor(state.progress);
   const { callsign, sigil } = state.progress.profile;
+  const rank = rankProgress(stats.stars);
   elements.profileCallsignDisplay.textContent = callsign;
   elements.profileCallsign.value = callsign;
-  elements.profileRank.textContent = rankFor(stats.stars);
+  elements.profileRank.textContent = rank.current;
+  if (elements.profileRankNext) {
+    elements.profileRankNext.textContent = rank.next
+      ? `${rank.remaining} star${rank.remaining === 1 ? "" : "s"} to ${rank.next}`
+      : `All ${rank.target} stars collected`;
+  }
   elements.profileSigil.dataset.sigil = sigil;
   elements.profileStatChambers.textContent = `${stats.completed} / ${stats.totalLevels}`;
   elements.profileStatStars.textContent = `${stats.stars} / ${stats.totalStars}`;

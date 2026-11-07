@@ -2372,6 +2372,15 @@ dd {
   text-transform: uppercase;
 }
 
+.profile-rank-next {
+  margin-top: 4px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--size-2xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .profile-form {
   display: flex;
   flex-direction: column;

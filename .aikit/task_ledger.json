@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-12-modal-actions",
+    "task_id": "cycle-13-rank-progress",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794089700.7001293,
+    "updated_at": 1794090852.275726,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794089769.4828022
+    "completed_at": 1794090870.022157
   },
   "checkpoints": [
-    {
-      "task_id": "cycle-08-star-pace",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Plan: show the current star pace in the moves HUD so every move tells the player whether three stars are still reachable",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794085353.7111626,
-      "timestamp_str": "2026-11-08 00:02:33",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "The HUD shows moves against par but not the rating those moves would earn. A player who overshoots par by one only discovers the lost 3-star run on the victory card; starsFor already defines the boundary at par and par+2.",
-        "benefits": "Three small stars next to the move count dim as the run crosses par and par+2, giving immediate, glanceable feedback without a new panel or modal; the aria label states the pace for screen readers.",
-        "risks": "contract: adds a data-cue marker and reuses starsMarkup; dependency: none; concurrency: none; state: derived from moves and par, reset with the session; layout: the moves metric grows by about 30px and may wrap at 320px.",
-        "mitigation": "Static HUD marker test, starsFor boundaries already covered, before/after HUD screenshots at moves 0/5/8 on Double Down, a real five- and eight-click run reading the star count and aria label, mobile width checks, and the 18-level regression."
-      },
-      "plan_digest": "5a921919fd619bd2aee2da95a0c6f51200b8d2882e6fce6760c3e7ae4f2e1915"
-    },
-    {
-      "task_id": "cycle-08-star-pace",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/3] Implemented: hud-stars cue in the moves metric, starsMarkup(starsFor()) and pace aria label in updateGameView, compact star row styling, HUD contract assertion, README and ADR-016",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794085950.456517,
-      "timestamp_str": "2026-11-08 00:12:30",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-08-star-pace",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Verified: npm test 87/87; aikit check 5/5; Double Down moves 0/5/8 show 3/2/1 earned stars and matching aria labels; no horizontal overflow at 320-414px; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794085951.0537517,
-      "timestamp_str": "2026-11-08 00:12:31",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "cycle-08-star-pace",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'cycle-08-star-pace' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794085966.3596349,
-      "timestamp_str": "2026-11-08 00:12:46",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "cycle-09-star-shape",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794089769.482804,
       "timestamp_str": "2026-11-08 01:16:09",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-13-rank-progress",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: show the next rank and stars remaining under the operator rank",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794089892.695452,
+      "timestamp_str": "2026-11-08 01:18:12",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "The profile shows the current rank (for example Operator) but not how far the player is from the next one; the thresholds live only in code, so 10 stars and 18 stars look equally complete until the rank name changes.",
+        "benefits": "A line under the rank states '9 stars to Weaver' or 'All 54 stars collected', turning the rank into a visible progression target without a new panel or save field.",
+        "risks": "contract: rank thresholds move into one shared constant; dependency: none; concurrency: none; state: derived from statsFor stars; layout: one short mono line under the rank, which already has room.",
+        "mitigation": "Pure rankProgress cases at 0/7/8/44/54/invalid, a shared RANKS table with unchanged rankFor results, a seeded 10-star before/after profile pair, a played First Light rank update, and the 18-level regression."
+      },
+      "plan_digest": "fda15ed92124cf9c79cd26918a11262936ca1e93e07630c71cad46cc45c15d6c"
+    },
+    {
+      "task_id": "cycle-13-rank-progress",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: frozen RANKS table shared by rankFor, rankProgress helper with three tests, profile-rank-next line and copy, muted styling, UI cue contract, README and ADR-021",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794090851.9740226,
+      "timestamp_str": "2026-11-08 01:34:11",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-13-rank-progress",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 103/103; aikit check 5/5; seeded 10-star profile reads 9 stars to Weaver, fresh First Light clear reads 5 stars to Operator, before worktree shows no next line; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794090852.275726,
+      "timestamp_str": "2026-11-08 01:34:12",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-13-rank-progress",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-13-rank-progress' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794090870.022159,
+      "timestamp_str": "2026-11-08 01:34:30",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

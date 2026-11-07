@@ -54,7 +54,7 @@ Every episode ends with a larger, harder finale. Par rises from 1 move in First 
 
 ### Operator Profile and Audio
 
-The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars.
+The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars. The profile also names the next rank and how many stars remain to reach it.
 
 Music and effects are generated at runtime with WebAudio; there are no audio files. Music begins after the first user gesture, respects the browser autoplay policy, pauses when the tab is hidden, and can be toggled independently from effects in the profile or muted together with M. A rotation also reports its consequence: a two-note charge when a receiver lights, and a gate sweep when a beam's portal transit changes.
 
@@ -129,6 +129,7 @@ prism-relay/
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.
 - **No solved dead ends.** If the victory dialog is dismissed, the game foot keeps a Next chamber action (or Episode index on the finale) until the player restarts or leaves.
 - **Pinned modal actions.** Modal bodies scroll while the action row stays fixed at the bottom, so a phone can tap Return, Next or Replay without scrolling; a one-pixel rule separates the scrolling body from the actions.
+- **Visible rank progress.** The profile line under the rank names the next rank and the stars remaining; at the cap it reports that all 54 stars are collected.
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow
