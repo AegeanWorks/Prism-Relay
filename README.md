@@ -92,6 +92,7 @@ prism-relay/
 │   │   ├── app.js             <- screens, board renderer, profile, input, dialogs
 │   │   ├── audio.js           <- generated effects and ambient music, no assets
 │   │   ├── cues.js            <- state-derived charge and portal sound decisions
+│   │   ├── hints.js           <- pluralized par and scoring copy
 │   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
 │   │   └── progress.js        <- versioned saves, profile, rank and statistics
 │   ├── styles.css             <- component styling using theme tokens
@@ -103,6 +104,7 @@ prism-relay/
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
     ├── layout.test.js         <- viewport fit arithmetic for tall chambers
     ├── cues.test.js           <- charge and portal transit cue decisions
+    ├── hints.test.js          <- singular and plural par copy
     └── ui.test.js             <- screen, control and manifest contract
 ```
 
@@ -116,6 +118,7 @@ prism-relay/
 - **Accessible by construction.** The board is a group of real buttons with labels, roving keyboard focus, a live status line and a native `<dialog>`; buttons and topbar controls meet 3:1 boundaries and 44px coarse-pointer targets, while dense board cells stay at least 24px.
 - **Tall chambers fit the screen.** On desktop the board frame is capped by the viewport height and the chamber's aspect ratio, so the 11x23 finale shows its whole relay at 1440x900; a 304px floor keeps every cell at least 24px.
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
+- **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **No external assets.** Light beams are SVG paths, pieces are CSS shapes, and all audio is synthesized with WebAudio after a user gesture.
 
 ## AIKit Workflow

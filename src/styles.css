@@ -1736,10 +1736,6 @@ dd {
     min-width: 0;
   }
 
-  .metric em {
-    display: none;
-  }
-
   .game-metrics .icon-button {
     width: 36px;
     min-width: 36px;

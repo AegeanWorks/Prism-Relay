@@ -11,8 +11,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 01 | Levels / tall-chamber presentation | done |
 | 02 | Audio cues | done |
 | 03 | Graphics and effects / portal legibility | done |
-| 04 | UI readability | next |
-| 05 | Progression and saves | planned |
+| 04 | UI readability / compact HUD | done |
+| 05 | Progression and saves | next |
 | 06 | Game feel | planned |
 
 ---
@@ -268,5 +268,87 @@ console errors. Report: `.review/cycles/cycle-03/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(ui): highlight live portal pairs and color all four gates`.
+
+---
+
+## Cycle 04 - UI readability: the par target on compact HUDs
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect: at `max-width: 520px` the stylesheet hid `.metric em`, the only par target printed
+on the game screen. A real 390x844 touch viewport rendered `MOVES 0 | RECEIVERS 0/2` with no par;
+splitter and portal levels do not mention par in the side hint, so a phone player had to leave the
+chamber to rediscover it. First Light also read "Par is 1 moves." on desktop.
+
+Evidence: `.review/cycles/cycle-04/before-double-down-390x844.png` (no par) and the baseline
+`before-first-light-1440x900.png` (hint says "1 moves"). Playwright computed
+`getComputedStyle(.metric em).display === "none"` at 390, 320 and 360 widths on the cycle-03 build.
+
+### ANALYZE
+
+- Survivor: keep the par element and let the existing wrapping metric absorb it. Removing the rule
+  costs 0px height at 360+ and 3px at 320, with no horizontal overflow.
+- Survivor: pluralize the one-move hint through a pure helper so "1 move" cannot regress.
+- Killed: adding a new HUD row or a second par label. The element already exists and is styled; only
+  the visibility rule is wrong.
+- Killed: hiding the receivers metric instead. Par is the scoring target; receiver count is also
+  needed, and both fit at 320 when the metric wraps.
+- Killed: changing the chamber-card par or the victory grid. Both already read correctly.
+
+### IMPLEMENT
+
+Failing-first: `tests/hints.test.js` failed with `ERR_MODULE_NOT_FOUND`; the new stylesheet guard in
+`tests/ui.test.js` failed on `.metric em { display: none; }`.
+
+Files:
+- `src/styles.css`: remove the compact `display: none` for `.metric em`; the existing `.metric`
+  `flex-wrap: wrap` handles 320px.
+- `src/ui/hints.js` (new): `parHint(par)` returns "Par is 1 move." or "Par is N moves." and falls
+  back to 0 for invalid input.
+- `src/ui/app.js`: use `parHint()` for the mirror-level hint.
+- `tests/hints.test.js` (new): singular, plural, invalid.
+- `tests/ui.test.js`: guard that no rule hides `.metric em`.
+- `README.md`, `.aikit/decisions.md` ADR-012.
+
+### PROOF
+
+Same setup for every mobile pair: headless Edge 157, 390x844 viewport, device scale 2, mobile and
+touch emulation, fresh browser context and storage, URL `/?level=double-down`.
+
+| Pair | Before | After |
+|---|---|---|
+| Double Down 390x844, initial | `.review/cycles/cycle-04/before-double-down-390x844.png` | `.review/cycles/cycle-04/after-double-down-390x844.png` |
+
+Before: `MOVES 0 | RECEIVERS 0/2`, par absent. After: `MOVES 0 / 4 par | RECEIVERS 0/2`, par
+visible, HUD height 62px, `scrollWidth 390 = innerWidth 390`.
+
+Additional pairs:
+- First Light 390x844: `before-first-light-390x844.png` / `after-first-light-390x844.png` (par 1 now
+  visible; First Light is unaffected by cycles 01-03, still a 640px/86px-cell board at desktop).
+- First Light 1440x900: `before-first-light-1440x900.png` / `after-first-light-1440x900.png`; the
+  hint changes from "Par is 1 moves." to "Par is 1 move. Every rotation counts."
+- 320x568 after: `after-the-confluence-320x568.png` shows `/ 13 par` wrapping below `MOVES 0`, HUD
+  65px, `scrollWidth 320 = innerWidth 320`.
+
+Played run: touch viewport 390x844, Double Down solved with 4 real `tap()` gestures in 4 moves,
+receivers 2/2, 3 stars, `/4 par` in the HUD at every step, 0 page and console errors. Victory
+screenshot: `.review/cycles/cycle-04/double-down-victory-390x844.png`. Report:
+`.review/cycles/cycle-04/mobile-report.json`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-04/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 80 tests, 80 pass, 0 fail (was 76; +3 hint cases, +1 stylesheet guard).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new UI handle.
+- `node --check src/ui/app.js`, `src/ui/hints.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(ui): keep the par target visible on compact HUDs`.
+
 
 

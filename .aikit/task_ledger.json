@@ -1,61 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "cycle-03-portal-legibility",
+    "task_id": "cycle-04-par-visibility",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794081508.6347594,
+    "updated_at": 1794082472.5060291,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794081519.5387414
+    "completed_at": 1794082483.6187081
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 9",
-      "phase_num": 3,
-      "description": "Reforge stage 9: window 27, 3 commit(s), 6 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293415.9603844,
-      "timestamp_str": "2026-10-29 20:03:35",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 10",
-      "phase_num": 3,
-      "description": "Reforge stage 10: window 30, 3 commit(s), 23 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293465.3099985,
-      "timestamp_str": "2026-10-29 20:04:25",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 11",
-      "phase_num": 3,
-      "description": "Reforge stage 11: window 33, 4 commit(s), 6 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793294999.2972429,
-      "timestamp_str": "2026-10-29 20:29:59",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 12",
-      "phase_num": 3,
-      "description": "Reforge stage 12: window 35, 1 commit(s), 0 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793295057.0468452,
-      "timestamp_str": "2026-10-29 20:30:57",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 12",
@@ -248,6 +204,56 @@
       "status": "completed",
       "timestamp": 1794081519.5387433,
       "timestamp_str": "2026-11-07 22:58:39",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-04-par-visibility",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: keep the par target visible on compact HUDs and pluralize the one-move hint with a pure helper",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794082398.005104,
+      "timestamp_str": "2026-11-07 23:13:18",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "At max-width 520 the HUD hides .metric em, the only par target on the game screen; a 390px phone shows MOVES 0 and RECEIVERS 0/2 but no par, and splitter/portal levels do not repeat it in the hint. First Light also reads 'Par is 1 moves.'",
+        "benefits": "Par remains visible from 320px up, the metric wraps instead of disappearing, and one-move copy reads correctly; no new HUD row or handle is needed.",
+        "risks": "contract: style rule removal and a new hint helper; dependency: none; concurrency: none; state: no save change; at 320px the metrics bar grows 3px and the move metric wraps its par line.",
+        "mitigation": "Pure parHint() cases for 1/4/13/invalid, a stylesheet guard against re-hiding .metric em, mobile before/after screenshots at 390x844, a 320x568 overflow check, a 4-tap Double Down clear and the full 18-chamber regression run."
+      },
+      "plan_digest": "a9d24499e0d6c57a9f2e92dadf175d596426132aa93f523802305de4399cc868"
+    },
+    {
+      "task_id": "cycle-04-par-visibility",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: removed the compact .metric em hide, added pure parHint() with singular/plural copy, wired it into the game hint, added three hint tests and a stylesheet guard, README and ADR-012",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794082472.1931834,
+      "timestamp_str": "2026-11-07 23:14:32",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-04-par-visibility",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: npm test 80/80; aikit check 5/5; 390x844 HUD shows /4 par with no overflow, 320x568 wraps cleanly, 4-tap Double Down clear at 4 moves/3 stars, desktop hint now 'Par is 1 move.'; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794082472.5060291,
+      "timestamp_str": "2026-11-07 23:14:32",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "cycle-04-par-visibility",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'cycle-04-par-visibility' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794082483.6187103,
+      "timestamp_str": "2026-11-07 23:14:43",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

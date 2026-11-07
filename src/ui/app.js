@@ -34,6 +34,7 @@ import {
   updateProfile,
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, portalTransitKey } from "./cues.js";
+import { parHint } from "./hints.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -606,7 +607,7 @@ function updateGameView() {
     ? "Portals preserve direction. Follow the paired number."
     : board.splitters.length
       ? "Click a splitter to flip which side receives the fork."
-      : `Par is ${state.level.par} moves. Every rotation counts.`;
+      : parHint(state.level.par);
   elements.legendSplitter.hidden = board.splitters.length === 0;
   elements.legendPortal.hidden = board.portals.length === 0;
 

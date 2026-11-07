@@ -95,6 +95,11 @@ test("topbar controls keep a 44px touch target on coarse pointers", () => {
   assert.match(coarse, /min-height:\s*44px/);
 });
 
+test("the compact HUD keeps the par target visible", () => {
+  const css = readFileSync(new URL("src/styles.css", root), "utf8");
+  assert.doesNotMatch(css, /\.metric em\s*\{[^}]*display:\s*none/);
+});
+
 test("the shell has no inline styles or third-party asset dependencies", () => {
   assert.equal(/<style[ >]/i.test(html), false);
   assert.equal(/style="/i.test(html), false);
