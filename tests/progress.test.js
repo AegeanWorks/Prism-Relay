@@ -161,6 +161,25 @@ test("sound and music preferences round-trip through storage", () => {
   assert.equal(loaded.music, false);
 });
 
+test("a newer save version is preserved byte-for-byte when an older build plays", () => {
+  const future = JSON.stringify({
+    version: PROGRESS_VERSION + 1,
+    profile: { callsign: "FUTURE", sigil: "helix" },
+    best: { "first-light": { moves: 1, stars: 3 } },
+    futureOnly: { note: "keep this field" },
+  });
+  const storage = fakeStorage(future);
+  const progress = recordResult(loadProgress(storage), "first-light", 2, 3, "split-decision");
+  assert.equal(saveProgress(storage, progress), false);
+  assert.equal(storage.read(), future);
+});
+
+test("a corrupt record is still replaceable by a clean save", () => {
+  const storage = fakeStorage("{not json");
+  assert.equal(saveProgress(storage, loadProgress(storage)), true);
+  assert.equal(JSON.parse(storage.read()).version, PROGRESS_VERSION);
+});
+
 test("profile callsign and sigil update and clamp safely", () => {
   let progress = updateProfile(loadProgress(fakeStorage()), {
     callsign: "  Lumen   Architect Of The Long Way Home  ",

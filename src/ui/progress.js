@@ -99,6 +99,23 @@ export function saveProgress(storage, progress) {
     return false;
   }
   try {
+    const existing = storage.getItem(PROGRESS_KEY);
+    if (existing) {
+      let previous = null;
+      try {
+        previous = JSON.parse(existing);
+      } catch {
+        previous = null;
+      }
+      if (
+        previous &&
+        typeof previous === "object" &&
+        Number.isInteger(previous.version) &&
+        previous.version > PROGRESS_VERSION
+      ) {
+        return false;
+      }
+    }
     storage.setItem(PROGRESS_KEY, JSON.stringify(normalizeProgress(progress)));
     return true;
   } catch {

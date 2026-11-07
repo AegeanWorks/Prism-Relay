@@ -12,8 +12,8 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 02 | Audio cues | done |
 | 03 | Graphics and effects / portal legibility | done |
 | 04 | UI readability / compact HUD | done |
-| 05 | Progression and saves | next |
-| 06 | Game feel | planned |
+| 05 | Progression and saves / future-version preservation | done |
+| 06 | Game feel | next |
 
 ---
 
@@ -349,6 +349,82 @@ console errors. Report: `.review/cycles/cycle-04/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `fix(ui): keep the par target visible on compact HUDs`.
+
+---
+
+## Cycle 05 - Progression and saves: never overwrite a newer save version
+
+**Date**: 2026-11-07
+
+### FIND
+
+Defect (G-001 contract violation): a record with a future `version` was loaded as blank defaults,
+then the next save normalized and wrote version 1 over it. A played probe seeded a version-2 record
+with a FUTURE profile, `music: false`, a first-light best and `futureOnly`; completing First Light
+replaced it with version 1, reset the profile to OPERATOR and deleted `futureOnly`.
+
+Baseline: `.review/cycles/cycle-05/before-save-probe-report.json` — `storedVersionAfterPlay: 1`,
+`futureOnlySurvived: false`, `recordUnchanged: false`, victory 3 stars.
+
+### ANALYZE
+
+- Survivor: refuse the write in `saveProgress` when the stored record is a newer integer version.
+  This satisfies G-001 without changing the load-time blank fallback or adding a migration.
+- Survivor: keep corrupt JSON replaceable. Existing tests promise a corrupt record resets safely;
+  treating every parse failure as read-only would strand players with a broken record.
+- Survivor: leave the version-1 round-trip path untouched; only `version > PROGRESS_VERSION` blocks.
+- Killed: migrating version 2 in an older build. The older build cannot know the new semantics, and
+  G-001 explicitly forbids modifying or quarantining it.
+- Killed: rewriting the save key or adding a backup copy. Both would change the storage contract for
+  no gain; the original bytes are already the backup.
+- Killed: a UI banner. This cycle's contract is data preservation; the record is intentionally
+  read-only and the existing profile status copy is unchanged (known follow-up).
+
+### IMPLEMENT
+
+Failing-first: the new `progress.test.js` case asserted `saveProgress` returns `false` and the stored
+string is unchanged; it failed with `true !== false` before the guard.
+
+Files:
+- `src/ui/progress.js`: `saveProgress` parses the existing record and returns `false` without writing
+  when `version > PROGRESS_VERSION`; parse failures remain replaceable.
+- `tests/progress.test.js`: newer-version preservation and corrupt-record recovery cases.
+- `README.md`: save paragraph and additive-saves design bullet.
+- `.aikit/decisions.md`: ADR-013.
+
+No engine, level, UI markup or inventory change.
+
+### PROOF
+
+Played run, identical setup: headless Edge 157, 1440x900, fresh context, `localStorage` seeded with
+the same version-2 record, `/?level=first-light`, one real mirror click, victory modal.
+
+| Measurement | Before | After |
+|---|---|---|
+| `storedVersionAfterPlay` | 1 | 2 |
+| `storedProfile` | `OPERATOR / prism` | `FUTURE / helix` |
+| `futureOnlySurvived` | false | true |
+| `recordUnchanged` (byte-for-byte) | false | true |
+| First Light victory stars | 3 | 3 |
+
+Reports: `.review/cycles/cycle-05/before-save-probe-report.json` and
+`.review/cycles/cycle-05/after-save-probe-report.json`. State screenshots (no visual claim; both show
+the same victory state): `.review/cycles/cycle-05/before-future-save-after-play.png` and
+`after-future-save-after-play.png`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-05/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 82 tests, 82 pass, 0 fail (was 80; +2 save cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new UI handle.
+- `node --check src/ui/progress.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(save): preserve records from newer save versions`.
+
 
 
 
