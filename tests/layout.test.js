@@ -91,3 +91,39 @@ test("invalid pan geometry stays unpanned", () => {
   );
   assert.equal(wideBoardNeedsPan({ columns: 0, rows: 7, viewportWidth: 340 }), false);
 });
+
+test("a 23-row phone board fits at the 24px cell floor", () => {
+  const frameX = 18;
+  const frameY = 18;
+  const available = 581;
+  const width = fitBoardWidth({
+    columns: 11,
+    rows: 23,
+    availableHeight: available,
+    paddingX: frameX,
+    paddingY: frameY,
+    minWidth: 11 * 24 + frameX,
+    maxWidth: 358,
+  });
+  assert.equal(width, 287);
+  assert.ok((width - frameX) / 11 >= 24);
+  assert.ok(((width - frameX) * 23) / 11 + frameY <= available);
+});
+
+test("the 24px floor is kept when the height cannot fit", () => {
+  const frameX = 18;
+  const frameY = 18;
+  const available = 267;
+  const width = fitBoardWidth({
+    columns: 11,
+    rows: 23,
+    availableHeight: available,
+    paddingX: frameX,
+    paddingY: frameY,
+    minWidth: 11 * 24 + frameX,
+    maxWidth: 288,
+  });
+  assert.equal(width, 282);
+  assert.equal((width - frameX) / 11, 24);
+  assert.ok(((width - frameX) * 23) / 11 + frameY > available);
+});

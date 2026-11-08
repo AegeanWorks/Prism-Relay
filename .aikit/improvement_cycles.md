@@ -28,8 +28,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 18 | Accessibility audit / forced-colors toggles | done |
 | 19 | Post-fix verification sweep | done (zero findings) |
 | 20 | Mobile / wide-board pan | done |
+| 21 | Mobile / tall-board fit | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycle 20 was added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–21 were added afterward.
 
 ---
 
@@ -1531,3 +1532,76 @@ console errors. Report: `.review/cycles/cycle-20/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(mobile): pan wide boards at a 28px cell floor`.
+
+---
+
+## Cycle 21 - Mobile: tall-board height fit
+
+**Date**: 2026-11-08
+
+### FIND
+
+The 11x23 finale rendered a **340x711** board starting at y=264 and ending at **974** on 390x844,
+130px below the fold. At 320x568 it was 270x565 with 24.5px cells, ending at **867**. The 320 case
+already met the 24px floor and only needed the page-scroll fallback; the 390 case could fit if the
+board were narrowed instead of overflowing.
+
+Before captures: `scratch/prism-tall-before/confluence-390x844.png` and
+`confluence-board-390x844.png`.
+
+### ANALYZE
+
+- Survivor: in the compact layout, height-fit tall boards (`rows > columns`) only when the fitted
+  frame can fit the space to an 8px reserve, or when the fit is at least 24px narrower than the
+  current frame. This fixes 390 and landscape without shrinking the already-correct 320 case.
+- Survivor: a 24px cell floor via `minWidth = columns * 24 + frameX`, so the fix cannot create targets
+  below the documented floor.
+- Survivor: keep the existing page scroll at 320 and landscape when the floor cannot fit. No new
+  gesture or scroll container is needed for vertical content.
+- Killed: shrinking to the absolute available height without a floor. That would produce tiny targets
+  at 320 and landscape.
+- Killed: forcing landscape for tall boards. It makes the 23-row board 1,278px tall.
+- Killed: a new tall-board hint. The board is fully visible at 390; 320 simply scrolls the existing
+  page, which the player already does for the side panel.
+
+### IMPLEMENT
+
+Failing-first: two new `fitBoardWidth` mobile cases were added to `tests/layout.test.js`; they failed
+until the 24px floor and fit arithmetic were wired in.
+
+Files:
+- `src/ui/layout.js`: `TALL_MIN_CELL = 24`.
+- `src/ui/app.js`: compact tall branch measures available height, computes the fit with the 24px
+  floor, applies it when it fits or is materially narrower, and leaves the 100% width otherwise.
+- `tests/layout.test.js` (+2 cases).
+- `README.md`, `.aikit/decisions.md` ADR-028.
+
+No engine, level, save or inventory handle change.
+
+### PROOF
+
+Same setup: headless Edge 157, mobile/touch emulation, `/?level=the-confluence`, fresh state.
+
+| Pair | Before | After |
+|---|---|---|
+| Full screen 390x844 | `.review/cycles/cycle-21/before-confluence-390x844.png` | `.review/cycles/cycle-21/after-confluence-390x844.png` |
+| Board crop 390x844 | `.review/cycles/cycle-21/before-confluence-board-390.png` | `.review/cycles/cycle-21/after-confluence-board-390.png` |
+
+After:
+- **390x844**: board 269x562, 24.5px cells, top 264, bottom **826**, frame bottom 835; whole relay
+  visible inside the 844px viewport, page width 390.
+- **320x568**: board 270x565, 24.5px cells, bottom 867; page-scroll fallback retained.
+- **844x390 landscape**: board 264x552 at 24px cells (was 1,278px tall), page scroll.
+- Played finale at both 390x844 and 320x568: **13 real taps, 13 moves, par 13, 6/6 receivers,
+  3 stars**, 0 errors. Report: `.review/cycles/cycle-21/tall-report.json`.
+- Desktop geometry unchanged; full 18/18 run at exact par is recorded in the play report.
+
+### GATES
+
+- `npm test` -> 112 tests, 112 pass, 0 fail (was 110; +2 tall-phone cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> inventory unchanged; no new handle or cue.
+- `node --check src/ui/app.js`, `src/ui/layout.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(mobile): height-fit tall chambers at the 24px floor`.

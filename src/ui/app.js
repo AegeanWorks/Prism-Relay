@@ -21,6 +21,7 @@ import {
   BOARD_MAX_WIDTH,
   BOARD_MIN_WIDTH,
   MOBILE_MIN_CELL,
+  TALL_MIN_CELL,
   fitBoardWidth,
   wideBoardNeedsPan,
 } from "./layout.js";
@@ -406,15 +407,6 @@ function fitBoardToViewport() {
   if (elements.boardStage) {
     elements.boardStage.style.width = "";
   }
-  if (compactLayout.matches) {
-    const board = state.session.board;
-    const viewportWidth = elements.boardViewport?.clientWidth ?? 0;
-    if (wideBoardNeedsPan({ columns: board.width, rows: board.height, viewportWidth })) {
-      elements.boardStage.style.width = `${board.width * MOBILE_MIN_CELL}px`;
-    }
-    updateBoardPanHint();
-    return;
-  }
   const styles = getComputedStyle(frame);
   const frameX =
     (Number.parseFloat(styles.paddingLeft) || 0) +
@@ -430,6 +422,33 @@ function fitBoardToViewport() {
   let documentTop = 0;
   for (let node = frame; node; node = node.offsetParent) {
     documentTop += node.offsetTop;
+  }
+  if (compactLayout.matches) {
+    const board = state.session.board;
+    const viewportWidth = elements.boardViewport?.clientWidth ?? 0;
+    if (wideBoardNeedsPan({ columns: board.width, rows: board.height, viewportWidth })) {
+      elements.boardStage.style.width = `${board.width * MOBILE_MIN_CELL}px`;
+    } else if (board.height > board.width) {
+      const availableHeight = window.innerHeight - documentTop - 8;
+      if (rect.height > availableHeight) {
+        const fit = fitBoardWidth({
+          columns: board.width,
+          rows: board.height,
+          availableHeight,
+          paddingX: frameX,
+          paddingY: frameY,
+          minWidth: board.width * TALL_MIN_CELL + frameX,
+          maxWidth: Math.min(BOARD_MAX_WIDTH, rect.width),
+        });
+        const fitHeight =
+          ((fit - frameX) * board.height) / board.width + frameY;
+        if (fitHeight <= availableHeight || fit < rect.width - 24) {
+          frame.style.width = `${fit}px`;
+        }
+      }
+    }
+    updateBoardPanHint();
+    return;
   }
   const availableHeight = window.innerHeight - documentTop - BOARD_FOOT_RESERVE;
   const width = fitBoardWidth({

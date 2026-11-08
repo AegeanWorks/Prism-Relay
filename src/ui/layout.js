@@ -1,6 +1,7 @@
 export const BOARD_MAX_WIDTH = 640;
 export const BOARD_MIN_WIDTH = 304;
 export const MOBILE_MIN_CELL = 28;
+export const TALL_MIN_CELL = 24;
 
 function finite(value) {
   return Number.isFinite(value);

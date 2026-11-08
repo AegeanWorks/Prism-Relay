@@ -124,6 +124,7 @@ prism-relay/
 - **Legible portal pairs.** Four gate pairs use lime, cyan, magenta and gold; only pairs carrying a beam stay at full glow with a breathing ring, while idle pairs dim, so multi-pair chambers read at a glance.
 - **Prisms are taught in place.** Chambers whose only special piece is a fixed prism show the pass-through and two-fork rule in the side panel; combo chambers keep the splitter and portal notes without adding a third.
 - **Wide boards pan on phones.** Crosscurrent keeps 28px cells on narrow screens by panning inside the board frame with a swipe/rotate hint; normal and tall boards keep their current sizing, so every board cell is at least 24px on phones.
+- **Tall boards fit when they can.** On a 390px phone the 11x23 finale height-fits at 24.5px cells with the whole relay visible; a 320px screen keeps the 24px floor and the existing page scroll.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.
 - **Audible navigation.** Every navigation arrow, topbar control and dialog open or close plays the same short UI tone; screenshot query modes stay silent because the calls live in click and key handlers.
