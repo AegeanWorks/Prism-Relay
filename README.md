@@ -31,7 +31,7 @@ A neon light-routing puzzle game: rotate mirrors and splitters, split beams thro
 | Arrow keys | Move focus between rotatable pieces |
 | Space / Enter | Rotate the focused piece |
 | Z | Undo the last rotation |
-| R | Restart the chamber |
+| R | Restart the chamber (asks after the first move) |
 | P | Open or close the operator profile |
 | Esc | Pause |
 | M | Mute or unmute all audio |
@@ -132,6 +132,7 @@ prism-relay/
 - **Audible navigation.** Every navigation arrow, topbar control and dialog open or close plays the same short UI tone; screenshot query modes stay silent because the calls live in click and key handlers.
 - **Last move stays marked.** The last rotated cell keeps a thin cyan outline until the next rotation or reset, while the 320ms rotation bump class clears itself.
 - **Undo protects a good run.** The HUD undo button (or Z) reverts the most recent rotation, refunds its move, clears any completion state and puts the star pace back where it was. History is in-memory only and clears on restart or level change, so the save format is unchanged.
+- **Restart asks first.** Once a run has a move, the HUD reset and R open a confirmation naming the chamber and move count; Keep playing leaves every rotation intact. A zero-move reset stays immediate, and the pause dialog's deliberate restart remains direct.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.

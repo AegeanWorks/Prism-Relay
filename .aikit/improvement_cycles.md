@@ -31,8 +31,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 21 | Mobile / tall-board fit | done |
 | 22 | Mobile / chamber episode tabs | done |
 | 23 | Undo last rotation | done |
+| 24 | Restart confirmation | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 and the cycle 23 undo feature were added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22, the cycle 23 undo feature and the cycle 24 restart guard were added afterward.
 
 ---
 
@@ -1765,3 +1766,74 @@ Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; de
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(game): undo the last rotation`.
+
+---
+
+## Cycle 24 - Confirm a restart after the first move
+
+**Date**: 2026-11-08
+
+### FIND
+
+The restart icon sat directly beside the new undo icon in the phone HUD. Tapping it wiped every
+rotation immediately, and the only recovery was to re-solve the chamber. On a 13-move finale that is
+a costly mistap, and undo cannot help because reset clears the history.
+
+Baseline evidence: `.review/cycles/cycle-24/restart-dialog-390x844.png` shows the new guard; the
+played report records the one-move run before it.
+
+### ANALYZE
+
+- Survivor: ask for confirmation only after the first move. A zero-move reset stays instant because
+  there is no progress to lose.
+- Survivor: reuse the existing native dialog with the chamber name, move count, and Keep playing as
+  the primary action, so Cancel is the easiest choice.
+- Survivor: open the same guard from the HUD icon and the R shortcut. R is deliberate, but a held or
+  mistaken key should not erase a long run.
+- Survivor: keep the pause dialog's explicit “Restart chamber” action direct; the player already
+  opened a dialog and chose that action.
+- Killed: a browser `confirm()`. The game already has a styled, accessible dialog with 44px actions.
+- Killed: an undo-after-reset stack. That would need a full board snapshot and would make the restart
+  guard redundant.
+- Killed: confirming every reset. Immediate zero-move reset remains the fastest path on a fresh board.
+
+### IMPLEMENT
+
+Failing-first: three `restartPrompt` cases in `tests/hints.test.js` failed before the helper existed.
+
+Files:
+- `src/ui/hints.js`: `restartPrompt(levelName, moves)` with singular/plural and fallback copy.
+- `src/ui/app.js`: `requestReset` opens the restart dialog when moves exist; reset buttons and R use
+  it; zero-move and completed runs reset directly; the pause dialog keeps its direct restart.
+- `tests/hints.test.js` (+3 cases).
+- `README.md`, `.aikit/decisions.md` ADR-031.
+
+No engine, save, level or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; desktop at 1440x900.
+
+- **Dialog**: title “Discard this run?”, body “You have made 1 move in Split Decision. Restarting
+  returns every piece to its opening position.”, actions Keep playing / Restart chamber, both 44px
+  high; page width equals the viewport at both sizes.
+- **Cancel**: one wrong move leaves 1 move, the rotated slash, the undo button enabled and the
+  status at “1 of 2 receivers charged.”; Keep playing closes the dialog without changing any of them.
+- **Keyboard**: R opens the same dialog; Escape closes it and the run survives.
+- **Confirm**: Restart chamber returns to 0 moves, the opening backslash, “Rotate a piece to begin.”
+  and a disabled undo button.
+- **Zero moves**: reset closes immediately with no dialog.
+- **Desktop**: R opens the guard, Keep playing retains 1 move, and the confirmed restart returns to 0.
+- Full regression play: all 18 chambers at exact par with 3 stars, 0 console errors.
+  Report: `.review/cycles/cycle-24/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 121 tests, 121 pass, 0 fail (was 118; +3 restart-copy cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> no new handles; the dialog reuses `modal`, `modal-primary` and
+  `modal-secondary`.
+- `node --check src/ui/app.js`, `src/ui/hints.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(ui): confirm a restart after the first move`.

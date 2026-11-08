@@ -4,6 +4,7 @@ import {
   parHint,
   postVictoryAction,
   relayCtaLabel,
+  restartPrompt,
   saveStatusMessage,
 } from "../src/ui/hints.js";
 
@@ -59,4 +60,25 @@ test("the title CTA becomes a replay at eighteen of eighteen", () => {
 
 test("a zero total does not claim a replay", () => {
   assert.equal(relayCtaLabel(0, 0), "Enter the relay");
+});
+
+test("a one-move restart names the singular move and the chamber", () => {
+  assert.deepEqual(restartPrompt("Split Decision", 1), {
+    title: "Discard this run?",
+    body: "You have made 1 move in Split Decision. Restarting returns every piece to its opening position.",
+  });
+});
+
+test("a longer restart keeps the plural move count", () => {
+  assert.equal(
+    restartPrompt("The Confluence", 13).body,
+    "You have made 13 moves in The Confluence. Restarting returns every piece to its opening position.",
+  );
+});
+
+test("a restart prompt falls back for missing copy and invalid counts", () => {
+  assert.deepEqual(restartPrompt("", -2), {
+    title: "Discard this run?",
+    body: "You have made 0 moves in this chamber. Restarting returns every piece to its opening position.",
+  });
 });

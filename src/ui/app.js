@@ -39,7 +39,7 @@ import {
   updateProfile,
 } from "./progress.js";
 import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "./cues.js";
-import { parHint, postVictoryAction, relayCtaLabel, saveStatusMessage } from "./hints.js";
+import { parHint, postVictoryAction, relayCtaLabel, restartPrompt, saveStatusMessage } from "./hints.js";
 import { mechanicNotes } from "./mechanics.js";
 import { starLabel, starsMarkup } from "./stars.js";
 
@@ -981,6 +981,27 @@ function undoLastMove() {
   audio.playUi();
 }
 
+function requestReset() {
+  if (!state.session || !state.level || state.screen !== "game" || state.modalOpen) {
+    return;
+  }
+  if (state.session.moves === 0 || state.completed) {
+    resetCurrentLevel();
+    return;
+  }
+  state.paused = true;
+  const copy = restartPrompt(state.level.name, state.session.moves);
+  audio.playUi();
+  openModal({
+    kind: "restart",
+    kicker: "Restart chamber",
+    title: copy.title,
+    bodyHtml: `<p>${copy.body}</p>`,
+    primary: { label: "Keep playing", run: () => {} },
+    secondary: { label: "Restart chamber", run: resetCurrentLevel },
+  });
+}
+
 function resetCurrentLevel() {
   if (!state.session || !state.level) {
     return;
@@ -1395,7 +1416,7 @@ function handleGlobalKeydown(event) {
   }
   if (key === "r") {
     event.preventDefault();
-    resetCurrentLevel();
+    requestReset();
     return;
   }
   if (key === "z") {
@@ -1520,7 +1541,7 @@ function bindEvents() {
     });
   });
   document.querySelectorAll('[data-ui="reset-level"], [data-ui="restart-level-side"]').forEach((button) => {
-    button.addEventListener("click", resetCurrentLevel);
+    button.addEventListener("click", requestReset);
   });
   elements.undoMove?.addEventListener("click", undoLastMove);
   elements.nextStep?.addEventListener("click", () => {
