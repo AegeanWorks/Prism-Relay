@@ -8,6 +8,8 @@
 
 A neon light-routing puzzle game: rotate mirrors and splitters, split beams through prisms, fold space through portals, and charge every receiver across four episodes.
 
+> **Archived**: Project complete; archived at the owner's request. (archived 2026-11-08). This project is read-only; its GitHub repository is archived.
+
 ## 30-Second Cold-Start Quick Reference
 
 - **Runtime Prerequisites**: Node.js 20+ (tested on Node 26) and a modern browser (Chromium, Firefox or Safari). No npm install and no network access are required.
