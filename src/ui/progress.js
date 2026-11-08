@@ -1,4 +1,10 @@
-import { LEVELS, TOTAL_LEVELS, TOTAL_STARS } from "../game/levels.js";
+import {
+  EPISODES,
+  LEVELS,
+  TOTAL_LEVELS,
+  TOTAL_STARS,
+  episodeForLevel,
+} from "../game/levels.js";
 
 export const PROGRESS_KEY = "prism-relay.progress.v1";
 export const PROGRESS_VERSION = 1;
@@ -235,4 +241,12 @@ export function rankProgress(stars) {
 
 export function isUnlocked(progress, levelId) {
   return normalizeProgress(progress).unlocked.includes(levelId);
+}
+
+export function nextEpisodeId(progress) {
+  const normalized = normalizeProgress(progress);
+  const next = LEVELS.find(
+    (level) => normalized.unlocked.includes(level.id) && !normalized.best[level.id],
+  );
+  return next ? episodeForLevel(next.id).id : EPISODES[0].id;
 }

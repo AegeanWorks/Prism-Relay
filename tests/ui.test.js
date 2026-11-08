@@ -17,6 +17,7 @@ const requiredControls = [
   "open-chambers",
   "back-to-title",
   "chamber-grid",
+  "episode-tabs",
   "game-back",
   "hud-moves",
   "hud-relays",

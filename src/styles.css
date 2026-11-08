@@ -481,6 +481,8 @@ dd {
 
 .chamber-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
 
+.episode-tabs { display: none; }
+
 .chamber-card {
   position: relative;
   display: flex;
@@ -1669,6 +1671,47 @@ dd {
 
   .chamber-grid {
     grid-template-columns: 1fr;
+  }
+
+  .episode-tabs {
+    display: flex;
+    margin-bottom: var(--space-4);
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .episode-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .episode-tab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--line-ui);
+    border-radius: var(--radius-round);
+    background: var(--glass-soft);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: var(--size-2xs);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .episode-tab.is-active {
+    border-color: var(--beam-cyan);
+    background: var(--beam-cyan-soft);
+    color: var(--paper);
+  }
+
+  .episode-tab:focus-visible {
+    outline: 2px solid var(--beam-cyan);
+    outline-offset: 2px;
+  }
+
+  .episode-block:not(.is-active) {
+    display: none;
   }
 
   .chamber-progress {

@@ -9,6 +9,7 @@ import {
   loadProgress,
   normalizeCallsign,
   normalizeProgress,
+  nextEpisodeId,
   rankFor,
   rankProgress,
   recordResult,
@@ -19,6 +20,7 @@ import {
   totalStars,
   updateProfile,
 } from "../src/ui/progress.js";
+import { LEVELS } from "../src/game/levels.js";
 
 function fakeStorage(initial = null) {
   let value = initial;
@@ -250,6 +252,35 @@ test("rankProgress caps at Relay Master", () => {
 test("rankProgress treats invalid stars as zero", () => {
   assert.deepEqual(rankProgress(Number.NaN), rankProgress(0));
   assert.deepEqual(rankProgress(-3), rankProgress(0));
+});
+
+test("nextEpisodeId starts at Ignition on a fresh save", () => {
+  assert.equal(nextEpisodeId(loadProgress(fakeStorage())), "ignition");
+});
+
+test("nextEpisodeId advances to the episode holding the next chamber", () => {
+  const best = {};
+  for (const id of [
+    "first-light",
+    "split-decision",
+    "mirror-maze",
+    "switchback",
+    "crossfire",
+    "the-vault",
+  ]) {
+    best[id] = { moves: 1, stars: 3 };
+  }
+  const progress = normalizeProgress({ version: 1, unlocked: ["first-light"], best });
+  assert.equal(nextEpisodeId(progress), "refraction");
+});
+
+test("nextEpisodeId falls back to Ignition after a full clear", () => {
+  const best = {};
+  for (const level of LEVELS) {
+    best[level.id] = { moves: level.par, stars: 3 };
+  }
+  const progress = normalizeProgress({ version: 1, unlocked: ["first-light"], best });
+  assert.equal(nextEpisodeId(progress), "ignition");
 });
 
 test("statsFor derives completion, perfect runs, stars and moves", () => {

@@ -28,6 +28,7 @@ import {
 import {
   isUnlocked,
   loadProgress,
+  nextEpisodeId,
   rankProgress,
   recordResult,
   saveProgress,
@@ -72,6 +73,7 @@ const elements = {
   titleBest: document.getElementById("title-best"),
   startLabel: document.getElementById("start-label"),
   chamberGrid: document.getElementById("chamber-grid"),
+  chamberTabs: document.getElementById("episode-tabs"),
   chamberProgressFill: document.getElementById("chamber-progress-fill"),
   chamberProgressTrack: document.getElementById("chamber-progress-track"),
   chamberProgressValue: document.getElementById("chamber-progress-value"),
@@ -125,6 +127,7 @@ const elements = {
 const state = {
   progress: loadProgress(storage),
   screen: "title",
+  chamberEpisode: null,
   level: null,
   session: null,
   completed: false,
@@ -239,6 +242,31 @@ function renderChambers() {
     return;
   }
   elements.chamberGrid.replaceChildren();
+  const activeEpisode =
+    state.chamberEpisode &&
+    EPISODES.some((episode) => episode.id === state.chamberEpisode)
+      ? state.chamberEpisode
+      : nextEpisodeId(state.progress);
+  if (elements.chamberTabs) {
+    elements.chamberTabs.replaceChildren();
+    for (const episode of EPISODES) {
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "episode-tab";
+      tab.dataset.ui = "episode-tab";
+      tab.dataset.episode = episode.id;
+      tab.classList.toggle("is-active", episode.id === activeEpisode);
+      tab.setAttribute("aria-pressed", String(episode.id === activeEpisode));
+      tab.setAttribute("aria-label", `Episode ${episode.number}: ${episode.name}`);
+      tab.textContent = `EP ${episode.number}`;
+      tab.addEventListener("click", () => {
+        state.chamberEpisode = episode.id;
+        renderChambers();
+        elements.chamberTabs?.querySelector(".is-active")?.focus();
+      });
+      elements.chamberTabs.append(tab);
+    }
+  }
   for (const episode of EPISODES) {
     const episodeLocked = !isUnlocked(state.progress, episode.levels[0].id);
     const cleared = episode.levels.filter((level) => state.progress.best[level.id]).length;
@@ -249,6 +277,7 @@ function renderChambers() {
     const block = document.createElement("section");
     block.className = "episode-block";
     block.classList.toggle("is-locked", episodeLocked);
+    block.classList.toggle("is-active", episode.id === activeEpisode);
     block.dataset.episode = episode.id;
     block.innerHTML = `
       <header class="episode-head">

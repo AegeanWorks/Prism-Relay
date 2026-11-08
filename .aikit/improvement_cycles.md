@@ -29,8 +29,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 19 | Post-fix verification sweep | done (zero findings) |
 | 20 | Mobile / wide-board pan | done |
 | 21 | Mobile / tall-board fit | done |
+| 22 | Mobile / chamber episode tabs | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–21 were added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 were added afterward.
 
 ---
 
@@ -1605,3 +1606,86 @@ After:
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(mobile): height-fit tall chambers at the 24px floor`.
+
+---
+
+## Cycle 22 - Mobile: episode tabs for the chamber index
+
+**Date**: 2026-11-08
+
+### FIND
+
+The chamber index stacked all four episodes and eighteen cards: **5,224px** at 390x844 and **5,359px**
+at 320x568. A phone player had to scroll through locked episodes to reach the current one. Desktop
+already fits all episodes in a two-column grid and did not need the extra navigation.
+
+Before captures: `.review/cycles/cycle-22/before-chambers-390x844.png` and
+`before-chambers-320x568.png`.
+
+### ANALYZE
+
+- Survivor: a four-tab episode filter on phones, showing one episode block at a time with the same
+  progress bar and header. It removes the other three episode grids from the initial height without
+  removing any chamber.
+- Survivor: default the active tab to the episode of the next unlocked incomplete chamber
+  (`nextEpisodeId`), so a fresh save opens Ignition and a completed Ignition save opens Refraction.
+- Survivor: compact `EP I`–`EP IV` labels with the full name in `aria-label`; all four fit at 390 and
+  320 without clipping.
+- Survivor: desktop keeps the base layout; tabs are hidden above 720px and every block stays visible.
+- Killed: a two-column mobile chamber grid. The cards would become too narrow for the subtitles and
+  footer at 320.
+- Killed: an accordion that keeps every header. Tabs are one row and make the active episode obvious.
+- Killed: a save field. The selected tab is UI-only; the default is recomputed from progress.
+
+### IMPLEMENT
+
+Failing-first: the new `nextEpisodeId` cases in `tests/progress.test.js` failed until the helper was
+added, and `tests/ui.test.js` required the `episode-tabs` control.
+
+Files:
+- `src/ui/progress.js`: `nextEpisodeId(progress)` using unlocked/incomplete levels and
+  `episodeForLevel`.
+- `index.html`: `#episode-tabs` group between the progress bar and chamber grid.
+- `src/ui/app.js`: four tab buttons, active class/`aria-pressed`, UI-only `state.chamberEpisode`,
+  default via `nextEpisodeId`, focus restoration after a tab click.
+- `src/styles.css`: base hidden tab bar, mobile-only tab/active styles, one active episode block at
+  `max-width: 720px`; base rule placed before the media block so source order does not hide it.
+- `tests/progress.test.js` (+3 cases), `tests/ui.test.js` (control contract).
+- `README.md`, `.aikit/decisions.md` ADR-029.
+
+No engine, level, save or inventory handle change.
+
+### PROOF
+
+Same setup: headless Edge 157, mobile/touch emulation, `/?screen=chambers`, fresh state for the
+height pair; a seeded Ignition-complete save for the played navigation run.
+
+| Pair | Before | After |
+|---|---|---|
+| 390x844 index | `.review/cycles/cycle-22/before-chambers-390x844.png` | `.review/cycles/cycle-22/after-chambers-390x844.png` |
+| 320x568 index | `.review/cycles/cycle-22/before-chambers-320x568.png` | `.review/cycles/cycle-22/after-chambers-320x568.png` |
+
+After:
+- **390x844**: 5,224px -> **1,997px**; four tabs visible, one Ignition block visible, no page-width
+  overflow.
+- **320x568**: 5,359px -> **2,080px**; four tabs visible, one block visible.
+- **1440x900**: 2,439px unchanged; tabs hidden; all four episode blocks visible.
+- Played run with Ignition complete: default active **Refraction**; click Ignition -> Ignition visible;
+  click Refraction -> Refraction visible; open Double Down -> `screen-game`; clear in **4 taps, 4
+  moves, par 4, 2/2 receivers, 3 stars**; Episode index returns with Refraction still active. Report:
+  `.review/cycles/cycle-22/tabs-report.json`.
+- Screenshots: `after-chambers-390-refraction.png`, `after-chambers-390-returned.png`,
+  `after-chambers-1440x900.png`.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-22/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 115 tests, 115 pass, 0 fail (was 112; +3 next-episode cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `control: episode-tabs` and `control: episode-tab`; no other drift.
+- `node --check src/ui/app.js`, `src/ui/progress.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(mobile): filter the chamber index with episode tabs`.
