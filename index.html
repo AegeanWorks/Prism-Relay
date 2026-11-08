@@ -124,10 +124,16 @@
             </div>
           </div>
 
+          <p class="board-pan-hint" id="board-pan-hint" data-cue="board-pan-hint" hidden>Swipe the board to pan. Rotate your phone for the full relay.</p>
+
           <div class="game-layout">
             <div class="board-frame" id="board-frame">
-              <div class="board" id="board" data-ui="board" data-panel="board" role="group" aria-label="Laser puzzle board"></div>
-              <svg class="beam-layer" id="beam-layer" aria-hidden="true"></svg>
+              <div class="board-viewport" id="board-viewport">
+                <div class="board-stage" id="board-stage">
+                  <div class="board" id="board" data-ui="board" data-panel="board" role="group" aria-label="Laser puzzle board"></div>
+                  <svg class="beam-layer" id="beam-layer" aria-hidden="true"></svg>
+                </div>
+              </div>
               <div class="board-corner board-corner--tl" aria-hidden="true"></div>
               <div class="board-corner board-corner--tr" aria-hidden="true"></div>
               <div class="board-corner board-corner--bl" aria-hidden="true"></div>

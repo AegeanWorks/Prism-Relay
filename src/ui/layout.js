@@ -1,8 +1,30 @@
 export const BOARD_MAX_WIDTH = 640;
 export const BOARD_MIN_WIDTH = 304;
+export const MOBILE_MIN_CELL = 28;
 
 function finite(value) {
   return Number.isFinite(value);
+}
+
+export function wideBoardNeedsPan({
+  columns,
+  rows,
+  viewportWidth,
+  minCell = MOBILE_MIN_CELL,
+}) {
+  if (
+    !finite(columns) ||
+    !finite(rows) ||
+    !finite(viewportWidth) ||
+    !finite(minCell) ||
+    columns <= 0 ||
+    rows <= 0 ||
+    viewportWidth <= 0 ||
+    minCell <= 0
+  ) {
+    return false;
+  }
+  return columns > rows && columns * minCell > viewportWidth;
 }
 
 export function fitBoardWidth({

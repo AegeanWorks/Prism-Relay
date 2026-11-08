@@ -27,8 +27,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 17 | Audio / navigation cues | done |
 | 18 | Accessibility audit / forced-colors toggles | done |
 | 19 | Post-fix verification sweep | done (zero findings) |
+| 20 | Mobile / wide-board pan | done |
 
-**Run status**: complete after 19 cycles; the final cycle found zero reproducible defects.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycle 20 was added afterward.
 
 ---
 
@@ -1451,3 +1452,82 @@ diff for defects/gaps, then pushed the window to `origin/master` without force.
 No new defect or gap survived review; no code change was needed in this run. Final
 `python aikit.py check prism-relay` -> 5/5 gates; `origin/master` equals local HEAD; working tree
 clean. Pushes used the AIKit publish environment because direct pushes are guarded.
+
+---
+
+## Cycle 20 - Mobile: wide-board pan at a 28px floor
+
+**Date**: 2026-11-08
+
+### FIND
+
+Crosscurrent is 21x7. On a phone it filled the width and shrank its cells to **16.2px at 390x844**
+and **12.8px at 320x568**, below the 24px target floor. Landscape fits the whole board at 29.1px, but
+portrait could not keep every column visible and usable targets at once. The first implementation
+also exposed a page-wide bug: the wide stage expanded the compact grid track, widening the whole page
+and hiding the hint; `minmax(0, 1fr)` plus `min-width: 0` fixed it before shipping.
+
+Baseline: `scratch/prism-pan-before/crosscurrent-390x844.png` and
+`scratch/prism-pan-before/crosscurrent-board-390x844.png`.
+
+### ANALYZE
+
+- Survivor: keep the phone width but let the board stage grow to `columns * 28px` and scroll inside a
+  dedicated viewport. The player swipes; the beam SVG fills the stage so paths stay aligned.
+- Survivor: show a short swipe/rotate hint only while the board is actually pannable, and hide it in
+  landscape or on normal/tall boards.
+- Survivor: a 28px floor makes every shipped board at least 24px on phones, including the 23-row
+  finale (24.5px at 320).
+- Killed: forcing landscape. It works for Crosscurrent but ruins The Confluence (1,278px tall at
+  844x390).
+- Killed: shrinking the board further. 16px/12.8px targets are the defect.
+- Killed: a separate scrollbar-only affordance; the hint names both the swipe and the rotate option.
+
+### IMPLEMENT
+
+Failing-first: `tests/layout.test.js` imported `wideBoardNeedsPan` before it existed, and
+`tests/ui.test.js` failed on the missing `board-pan-hint` cue.
+
+Files:
+- `src/ui/layout.js`: `MOBILE_MIN_CELL = 28`; `wideBoardNeedsPan({columns, rows, viewportWidth})`.
+- `index.html`: `.board-viewport` / `.board-stage` wrapper around the board and beam layer; pan hint.
+- `src/ui/app.js`: compact branch widens the stage only when the helper says so; `updateBoardPanHint`.
+- `src/styles.css`: scroll viewport, stage, beam inset 0, hint styling, `minmax(0, 1fr)` compact grid
+  and `min-width: 0` grid children.
+- `tests/layout.test.js` (+3 cases), `tests/ui.test.js` (cue contract).
+- `README.md`, `.aikit/decisions.md` ADR-027.
+
+No engine, level, save or inventory handle change.
+
+### PROOF
+
+Same setup: headless Edge 157, mobile/touch emulation, `/?level=crosscurrent`, fresh storage.
+
+| Pair | Before | After |
+|---|---|---|
+| Full screen 390x844 | `.review/cycles/cycle-20/before-crosscurrent-390x844.png` | `.review/cycles/cycle-20/after-crosscurrent-390x844.png` |
+| Board crop 390x844 | `.review/cycles/cycle-20/before-crosscurrent-board-390.png` | `.review/cycles/cycle-20/after-crosscurrent-board-390.png` |
+
+After measurements: 390x844 viewport 340px / stage 588px, cell **28px**, hint visible, page
+`scrollWidth 390 = innerWidth 390`; 320x568 viewport 270px / stage 588px, cell **28px**, hint visible,
+page width 320. Landscape 844x390: viewport 611 / stage 611, cell **29.1px**, hint hidden. Beam layer
+is exactly 0,0-aligned with the board at every size. The board can be scrolled to the far edge
+(`scrollLeft 248` at 390) and the full board is visible in the 588px crop.
+
+Played run: Crosscurrent cleared **in portrait** with 9 real taps, 9 moves, par 9, 5/5 receivers and
+3 stars; the board panned during the run. Report:
+`.review/cycles/cycle-20/pan-report.json`. Desktop regression: first-light, Crosscurrent and The
+Confluence keep their existing frames and beam alignment.
+
+Full regression play: all 18 chambers solved through real DOM clicks at exact par with 3 stars, 0
+console errors. Report: `.review/cycles/cycle-20/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 110 tests, 110 pass, 0 fail (was 107; +3 pan-decision cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `cue: board-pan-hint`; no other inventory drift.
+- `node --check src/ui/app.js`, `src/ui/layout.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(mobile): pan wide boards at a 28px cell floor`.

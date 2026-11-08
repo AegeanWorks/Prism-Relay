@@ -20,7 +20,9 @@ import * as audio from "./audio.js";
 import {
   BOARD_MAX_WIDTH,
   BOARD_MIN_WIDTH,
+  MOBILE_MIN_CELL,
   fitBoardWidth,
+  wideBoardNeedsPan,
 } from "./layout.js";
 import {
   isUnlocked,
@@ -85,6 +87,9 @@ const elements = {
   nextStep: document.querySelector('[data-ui="next-step"]'),
   board: document.getElementById("board"),
   boardFrame: document.getElementById("board-frame"),
+  boardViewport: document.getElementById("board-viewport"),
+  boardStage: document.getElementById("board-stage"),
+  boardPanHint: document.getElementById("board-pan-hint"),
   beamLayer: document.getElementById("beam-layer"),
   legendSplitter: document.querySelector('[data-legend="splitter"]'),
   legendPortal: document.querySelector('[data-legend="portal"]'),
@@ -398,7 +403,16 @@ function fitBoardToViewport() {
   }
   const frame = elements.boardFrame;
   frame.style.width = "";
+  if (elements.boardStage) {
+    elements.boardStage.style.width = "";
+  }
   if (compactLayout.matches) {
+    const board = state.session.board;
+    const viewportWidth = elements.boardViewport?.clientWidth ?? 0;
+    if (wideBoardNeedsPan({ columns: board.width, rows: board.height, viewportWidth })) {
+      elements.boardStage.style.width = `${board.width * MOBILE_MIN_CELL}px`;
+    }
+    updateBoardPanHint();
     return;
   }
   const styles = getComputedStyle(frame);
@@ -428,6 +442,18 @@ function fitBoardToViewport() {
     maxWidth: Math.min(BOARD_MAX_WIDTH, rect.width),
   });
   frame.style.width = `${width}px`;
+  updateBoardPanHint();
+}
+
+function updateBoardPanHint() {
+  if (!elements.boardPanHint || !state.session) {
+    return;
+  }
+  const board = state.session.board;
+  const viewportWidth = elements.boardViewport?.clientWidth ?? 0;
+  elements.boardPanHint.hidden =
+    !compactLayout.matches ||
+    !wideBoardNeedsPan({ columns: board.width, rows: board.height, viewportWidth });
 }
 
 let boardFitFrame = 0;

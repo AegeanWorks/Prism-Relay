@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   BOARD_MIN_WIDTH,
   fitBoardWidth,
+  wideBoardNeedsPan,
 } from "../src/ui/layout.js";
 
 const DEFAULTS = {
@@ -59,4 +60,34 @@ test("invalid geometry falls back to the minimum width", () => {
   ]) {
     assert.equal(fitBoardWidth({ ...DEFAULTS, columns: 11, rows: 23, ...patch }), BOARD_MIN_WIDTH);
   }
+});
+
+test("a wide board pans when 28px cells exceed the viewport", () => {
+  assert.equal(
+    wideBoardNeedsPan({ columns: 21, rows: 7, viewportWidth: 340 }),
+    true,
+  );
+  assert.equal(
+    wideBoardNeedsPan({ columns: 21, rows: 7, viewportWidth: 611 }),
+    false,
+  );
+});
+
+test("tall and square boards never need horizontal panning", () => {
+  assert.equal(
+    wideBoardNeedsPan({ columns: 11, rows: 23, viewportWidth: 340 }),
+    false,
+  );
+  assert.equal(
+    wideBoardNeedsPan({ columns: 9, rows: 9, viewportWidth: 340 }),
+    false,
+  );
+});
+
+test("invalid pan geometry stays unpanned", () => {
+  assert.equal(
+    wideBoardNeedsPan({ columns: 21, rows: 7, viewportWidth: Number.NaN }),
+    false,
+  );
+  assert.equal(wideBoardNeedsPan({ columns: 0, rows: 7, viewportWidth: 340 }), false);
 });
