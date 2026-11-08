@@ -1939,9 +1939,9 @@ Each endpoint was checked out in an isolated worktree and tested at its exact co
 |---|---|---|---|---|
 | 1 -> 3 | `091367e` | wide-board pan, tall-board fit, episode tabs | **115/115** | A player who explicitly selected an episode tab stayed on that completed episode after clearing its finale; the newly unlocked episode was not selected on return. |
 | 1 -> 6 | `e88fc01` | undo, restart confirmation, Daily Relay | **133/133** | A daily replay could show the current run's stars beside the day's best moves, with no best-star value; the profile had no lifetime daily totals; a best streak could be lost once it fell outside the 60-day history and a new streak reset the count. |
-| 1 -> 9 | `de3d757` | episode-tab advance, daily best clarity, profile daily stats, all-time best streak | **139/139** | All three findings fixed and replayed; no further defect survived review. |
+| 1 -> 9 | `8a8f048` | episode-tab advance, daily best clarity, profile daily stats, all-time best streak, seven-day history | **141/141** | All findings fixed and replayed; no further defect survived review. |
 
-Final `1 -> End` verification at `de3d757`: **139/139** tests, **5/5** gates, 18/18 played at
+Final `1 -> End` verification at `8a8f048`: **141/141** tests, **5/5** gates, 18/18 played at
 exact par, and `origin/master` equals local HEAD. The temporary endpoint worktrees were removed.
 
 ### ANALYZE
@@ -1982,17 +1982,18 @@ Files:
   **EP II / refraction**, with only the Refraction grid visible.
 - **1->6 endpoint**: `node --test tests` -> 133/133. The review probes exposed the daily replay and
   profile gaps above.
-- **1->9**: `node --test tests` -> **139/139**. A seeded profile with four daily days shows
+- **1->9**: `node --test tests` -> **141/141**. A seeded profile with four daily days shows
   **Daily relays 4 / Best streak 4** at 390 and 320 with no horizontal overflow. A daily replay
   scored at **8 moves/2 stars** shows **Best today 6 · 3 stars**, while the title card keeps
   **6 moves · 3 stars** and the **4-day streak**. A record with current streak 1 and stored best 4
-  shows **Best streak 4** in the profile.
+  shows **Best streak 4** in the profile. The title card renders **seven history dots**, four played
+  and today outlined, at **367x74 / 390** and **301x122 / 320** with no overflow.
 - Full regression play: all 18 chambers at exact par with 3 stars, 0 console errors.
   Report: `.review/cycles/cycle-26/play-report-1440x900.json`.
 
 ### GATES
 
-- `npm test` -> 139 tests, 139 pass, 0 fail (was 133 at the 1->6 endpoint).
+- `npm test` -> 141 tests, 141 pass, 0 fail (was 133 at the 1->6 endpoint).
 - `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
 - `npm run ui:snapshot` -> adds `cue: profile-daily` and `cue: profile-streak`.
 - `node --check src/ui/app.js`, `src/ui/daily.js`, `src/ui/progress.js` -> syntax ok.
