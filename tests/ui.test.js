@@ -23,6 +23,7 @@ const requiredControls = [
   "hud-relays",
   "reset-level",
   "pause-game",
+  "undo-move",
   "board",
   "restart-level-side",
   "game-hint",

@@ -30,8 +30,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 20 | Mobile / wide-board pan | done |
 | 21 | Mobile / tall-board fit | done |
 | 22 | Mobile / chamber episode tabs | done |
+| 23 | Undo last rotation | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 were added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 and the cycle 23 undo feature were added afterward.
 
 ---
 
@@ -1689,3 +1690,78 @@ console errors. Report: `.review/cycles/cycle-22/play-report-1440x900.json`.
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(mobile): filter the chamber index with episode tabs`.
+
+---
+
+## Cycle 23 - Undo the last rotation
+
+**Date**: 2026-11-08
+
+### FIND
+
+The only recovery action was Restart. On phones the rotatable targets are 24–28px, so a single mistap
+either forced a full re-solve or permanently worsened the star score. Puzzle players expect undo, and
+the engine had no history to support it.
+
+Baseline evidence: `.review/cycles/cycle-23/before-undo-390.png` (3 moves, 2-star pace) and
+`after-undo-button-390.png` (2 moves, 3-star pace).
+
+### ANALYZE
+
+- Survivor: record the pre-rotation orientation in an in-memory session history. `undoSession` pops
+  the last entry, restores the piece, refunds one move and refreshes the beam.
+- Survivor: clear completion and star state on both rotate and undo, so the pace is always derived
+  from the restored move count.
+- Survivor: a HUD icon button plus Z. The button is disabled at zero history and while paused,
+  complete or modal-blocked, which makes its state visible without changing the layout.
+- Survivor: 44x44 phone HUD controls. The extra third button must not shrink the existing reset or
+  pause targets below the coarse-pointer floor.
+- Killed: persisting history in the save. Undo is a run-local convenience and a save migration would
+  add risk without player value.
+- Killed: multi-step rewind UI. One-step undo at a time is enough for a mistap and keeps the control
+  self-explanatory.
+- Killed: undoing a completed chamber. The victory card owns the next action; restart and episode
+  navigation remain the recovery paths there.
+
+### IMPLEMENT
+
+Failing-first: three cases in `tests/engine.test.js` (restore/refund/clear completion, empty-history
+no-op, reset clears history) failed until `history` and `undoSession` existed.
+
+Files:
+- `src/game/engine.js`: `history` on the session; `rotateSessionCell` records the prior orientation;
+  `undoSession` restores it; `resetSession` clears history.
+- `index.html`: `data-ui="undo-move"` HUD button and a Z entry in the control footer.
+- `src/ui/app.js`: `undoSession` import, `undoLastMove`, click binding, Z shortcut, disabled state,
+  last-moved marker restore.
+- `src/styles.css`: disabled icon styling; 44x44 HUD controls with tighter phone gaps.
+- `tests/engine.test.js` (+3 cases), `tests/ui.test.js` (control contract), `README.md`,
+  `.aikit/decisions.md` ADR-030.
+
+No save format, level, solver or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; desktop at 1440x900.
+
+- **HUD fit**: undo/reset/pause each measure **44x44** at both widths, all inside the viewport; page
+  `scrollWidth` equals `innerWidth` (390 and 320). The undo button starts disabled.
+- **Played undo run** (`split-decision`, par 2): after three taps the HUD reads **3 moves,
+  “On pace for 2 stars”**; one button undo gives **2 moves, “On pace for 3 stars”** and restores the
+  bottom mirror to its slash orientation; two `Z` presses give 1 then **0 moves**, the button becomes
+  disabled, and the status returns to “Rotate a piece to begin.” A clean two-tap solve then clears at
+  **2 moves, par 2, 2/2 receivers, 3 stars**, 0 errors.
+- **Desktop keyboard**: one mirror click makes undo enabled at 1 move; Z returns it to 0 moves,
+  disabled, backslash restored, status “Rotate a piece to begin.”
+- Full regression play: all 18 chambers at exact par with 3 stars, 0 console errors.
+  Report: `.review/cycles/cycle-23/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 118 tests, 118 pass, 0 fail (was 115; +3 undo cases).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `control: undo-move` in `index.html` and `src/ui/app.js`.
+- `node --check src/ui/app.js`, `src/game/engine.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(game): undo the last rotation`.

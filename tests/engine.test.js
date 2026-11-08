@@ -13,6 +13,7 @@ import {
   rotateSessionCell,
   starsFor,
   traceBeams,
+  undoSession,
 } from "../src/game/engine.js";
 import {
   EPISODES,
@@ -67,6 +68,36 @@ test("cells without a rotatable piece cannot rotate", () => {
   assert.equal(rotateSessionCell(session, 0, 0), false);
   assert.equal(rotateSessionCell(session, 3, 0), false);
   assert.equal(session.moves, 0);
+});
+
+test("undo restores the last rotation, refunds the move and clears completion", () => {
+  const session = createSession(level(["..T", ">.\\", "..."], 1));
+  refreshSession(session);
+  assert.equal(session.complete, false);
+  assert.equal(rotateSessionCell(session, 2, 1), true);
+  assert.equal(session.board.mirrors[0].orientation, 0);
+  assert.equal(session.moves, 1);
+  assert.equal(session.complete, true);
+  assert.equal(undoSession(session), true);
+  assert.equal(session.board.mirrors[0].orientation, 1);
+  assert.equal(session.moves, 0);
+  assert.equal(session.complete, false);
+  assert.equal(session.stars, 0);
+});
+
+test("undo on an empty history is a no-op", () => {
+  const session = createSession(level([">..T"]));
+  assert.equal(undoSession(session), false);
+  assert.equal(session.moves, 0);
+});
+
+test("reset clears the undo history", () => {
+  const session = createSession(level([">.\\", "...", "..T"]));
+  rotateSessionCell(session, 2, 0);
+  assert.equal(session.history.length, 1);
+  resetSession(session);
+  assert.equal(session.history.length, 0);
+  assert.equal(undoSession(session), false);
 });
 
 test("cellNear resolves a beam endpoint to its tile and rejects open space", () => {

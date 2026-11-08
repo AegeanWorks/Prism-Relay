@@ -14,6 +14,7 @@ import {
   rotateSessionCell,
   starsFor,
   traceBeams,
+  undoSession,
 } from "../game/engine.js";
 import { solveLevel } from "../game/solver.js";
 import * as audio from "./audio.js";
@@ -84,6 +85,7 @@ const elements = {
   hudPar: document.getElementById("hud-par"),
   hudStars: document.getElementById("hud-stars"),
   hudRelays: document.getElementById("hud-relays"),
+  undoMove: document.querySelector('[data-ui="undo-move"]'),
   gameHint: document.getElementById("game-hint"),
   gameMechanic: document.getElementById("game-mechanic"),
   statusLine: document.getElementById("status-line"),
@@ -691,6 +693,9 @@ function updateGameView() {
     );
   }
   elements.hudRelays.textContent = `${lit}/${total}`;
+  if (elements.undoMove) {
+    elements.undoMove.disabled = state.session.history.length === 0;
+  }
   elements.gameHint.textContent = board.portals.length
     ? "Portals preserve direction. Follow the paired number."
     : board.splitters.length
@@ -941,6 +946,39 @@ function rotatePiece(x, y, element) {
     }, 320),
   );
   updateBoard(beforeLit);
+}
+
+function undoLastMove() {
+  if (
+    state.screen !== "game" ||
+    state.paused ||
+    state.completed ||
+    state.modalOpen ||
+    !state.session ||
+    !state.level
+  ) {
+    return;
+  }
+  const last = state.session.history[state.session.history.length - 1];
+  if (!undoSession(state.session)) {
+    return;
+  }
+  state.result = null;
+  state.victoryPending = false;
+  for (const piece of state.rotatableCells) {
+    const timer = turnTimers.get(piece.element);
+    if (timer) {
+      clearTimeout(timer);
+      turnTimers.delete(piece.element);
+    }
+    piece.element.classList.remove("is-turning");
+    piece.element.classList.toggle(
+      "is-last-moved",
+      Boolean(last) && piece.element === state.cellElements.get(`${last.x},${last.y}`),
+    );
+  }
+  updateBoard();
+  audio.playUi();
 }
 
 function resetCurrentLevel() {
@@ -1360,6 +1398,11 @@ function handleGlobalKeydown(event) {
     resetCurrentLevel();
     return;
   }
+  if (key === "z") {
+    event.preventDefault();
+    undoLastMove();
+    return;
+  }
   if (event.key === "Escape") {
     event.preventDefault();
     audio.playUi();
@@ -1479,6 +1522,7 @@ function bindEvents() {
   document.querySelectorAll('[data-ui="reset-level"], [data-ui="restart-level-side"]').forEach((button) => {
     button.addEventListener("click", resetCurrentLevel);
   });
+  elements.undoMove?.addEventListener("click", undoLastMove);
   elements.nextStep?.addEventListener("click", () => {
     const action = postVictoryAction(state.result);
     if (!action) {

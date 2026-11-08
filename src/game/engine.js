@@ -303,6 +303,7 @@ export function createSession(level) {
     stars: 0,
     litCount: 0,
     paths: [],
+    history: [],
   };
 }
 
@@ -318,10 +319,30 @@ export function refreshSession(session) {
 }
 
 export function rotateSessionCell(session, x, y) {
-  if (!rotateAt(session.board, x, y)) {
+  const cell = cellAt(session.board, x, y);
+  if (!cell || (cell.kind !== "mirror" && cell.kind !== "splitter")) {
     return false;
   }
+  session.history.push({ x, y, orientation: cell.orientation });
+  cell.orientation = cell.orientation === 0 ? 1 : 0;
   session.moves += 1;
+  session.complete = false;
+  session.stars = 0;
+  refreshSession(session);
+  return true;
+}
+
+export function undoSession(session) {
+  const last = session.history.pop();
+  if (!last) {
+    return false;
+  }
+  const cell = cellAt(session.board, last.x, last.y);
+  if (!cell) {
+    return false;
+  }
+  cell.orientation = last.orientation;
+  session.moves = Math.max(0, session.moves - 1);
   session.complete = false;
   session.stars = 0;
   refreshSession(session);
@@ -336,6 +357,7 @@ export function resetSession(session) {
   session.stars = 0;
   session.litCount = 0;
   session.paths = [];
+  session.history = [];
   refreshSession(session);
   return session;
 }

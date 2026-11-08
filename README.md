@@ -30,6 +30,7 @@ A neon light-routing puzzle game: rotate mirrors and splitters, split beams thro
 | Click / tap a mirror or splitter | Rotate it 90 degrees |
 | Arrow keys | Move focus between rotatable pieces |
 | Space / Enter | Rotate the focused piece |
+| Z | Undo the last rotation |
 | R | Restart the chamber |
 | P | Open or close the operator profile |
 | Esc | Pause |
@@ -130,6 +131,7 @@ prism-relay/
 - **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.
 - **Audible navigation.** Every navigation arrow, topbar control and dialog open or close plays the same short UI tone; screenshot query modes stay silent because the calls live in click and key handlers.
 - **Last move stays marked.** The last rotated cell keeps a thin cyan outline until the next rotation or reset, while the 320ms rotation bump class clears itself.
+- **Undo protects a good run.** The HUD undo button (or Z) reverts the most recent rotation, refunds its move, clears any completion state and puts the star pace back where it was. History is in-memory only and clears on restart or level change, so the save format is unchanged.
 - **Par stays visible.** The move counter keeps the par target on screen at every width; below 360px it wraps under the move count instead of disappearing, and a one-move par reads as "1 move".
 - **Live star pace.** Three small stars beside the move count show the rating the current run would earn; they drop from three to two at par+1 and to one after par+2, and the pace is exposed to screen readers.
 - **Stars have shape.** Earned stars are filled and unearned stars are outlined, so the pace and results stay readable in forced-colors mode and for color-impaired players.
