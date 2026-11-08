@@ -3,6 +3,7 @@ import { LEVELS } from "../game/levels.js";
 export const DAILY_KEY = "prism-relay.daily.v1";
 export const DAILY_VERSION = 1;
 const MAX_DAYS = 60;
+const MAX_STREAK = 3650;
 const EPOCH_DAY = Math.floor(Date.UTC(2026, 0, 1) / 86400000);
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -11,7 +12,7 @@ function blankDaily() {
   return {
     version: DAILY_VERSION,
     days: {},
-    streak: { count: 0, last: null },
+    streak: { count: 0, last: null, best: 0 },
   };
 }
 
@@ -115,6 +116,7 @@ export function normalizeDaily(raw) {
   }
   let count = 0;
   let last = null;
+  let best = 0;
   if (
     raw.streak &&
     typeof raw.streak === "object" &&
@@ -122,13 +124,22 @@ export function normalizeDaily(raw) {
     raw.streak.count > 0 &&
     parseKey(raw.streak.last)
   ) {
-    count = Math.min(raw.streak.count, MAX_DAYS);
+    count = Math.min(raw.streak.count, MAX_STREAK);
     last = raw.streak.last;
+    best = Math.min(
+      Math.max(
+        Number.isInteger(raw.streak.best) && raw.streak.best > 0
+          ? raw.streak.best
+          : count,
+        count,
+      ),
+      MAX_STREAK,
+    );
   }
   return {
     version: DAILY_VERSION,
     days: kept,
-    streak: { count, last },
+    streak: { count, last, best },
   };
 }
 
@@ -192,6 +203,23 @@ export function dailySummary(daily, date = new Date()) {
   };
 }
 
+export function dailyStats(daily) {
+  const normalized = normalizeDaily(daily);
+  const keys = Object.keys(normalized.days).sort();
+  let run = 0;
+  let best = 0;
+  let previous = null;
+  for (const key of keys) {
+    run = previous && previousDateKey(key) === previous ? run + 1 : 1;
+    best = Math.max(best, run);
+    previous = key;
+  }
+  return {
+    totalDays: keys.length,
+    bestStreak: Math.max(best, normalized.streak.best, normalized.streak.count),
+  };
+}
+
 export function recordDailyResult(daily, key, levelId, moves, stars) {
   const normalized = normalizeDaily(daily);
   if (
@@ -216,10 +244,15 @@ export function recordDailyResult(daily, key, levelId, moves, stars) {
   }
   let streak = normalized.streak;
   if (!previous) {
-    streak =
+    const count =
       normalized.streak.last === previousDateKey(key) && normalized.streak.count > 0
-        ? { count: normalized.streak.count + 1, last: key }
-        : { count: 1, last: key };
+        ? normalized.streak.count + 1
+        : 1;
+    streak = {
+      count,
+      last: key,
+      best: Math.max(normalized.streak.best, count),
+    };
   }
   return normalizeDaily({ version: DAILY_VERSION, days, streak });
 }

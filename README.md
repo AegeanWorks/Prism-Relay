@@ -55,7 +55,7 @@ Every episode ends with a larger, harder finale. Par rises from 1 move in First 
 
 ### Daily Relay
 
-The title screen features one date-driven chamber per local day, cycling through all eighteen chambers. It is a standalone challenge: today's best and a consecutive-day streak live under `prism-relay.daily.v1`, while campaign stars, unlocks and best moves are unchanged. Clearing it starts or extends a streak; replaying the same day keeps the better result and does not extend the streak again. A streak stays alive through the end of the following day.
+The title screen features one date-driven chamber per local day, cycling through all eighteen chambers. It is a standalone challenge: today's best and a consecutive-day streak live under `prism-relay.daily.v1`, while campaign stars, unlocks and best moves are unchanged. Clearing it starts or extends a streak; replaying the same day keeps the better result and does not extend the streak again. A streak stays alive through the end of the following day. The profile adds lifetime daily relays and the all-time best streak, and a daily victory names the best result for that day separately from the current run.
 
 ### Operator Profile and Audio
 
@@ -133,6 +133,7 @@ prism-relay/
 - **Wide boards pan on phones.** Crosscurrent keeps 28px cells on narrow screens by panning inside the board frame with a swipe/rotate hint; normal and tall boards keep their current sizing, so every board cell is at least 24px on phones.
 - **Tall boards fit when they can.** On a 390px phone the 11x23 finale height-fits at 24.5px cells with the whole relay visible; a 320px screen keeps the 24px floor and the existing page scroll.
 - **Episode tabs on phones.** Phones show four episode tabs and one episode grid at a time; desktop keeps all four episodes visible. The index drops from 5,224px to 1,997px at 390 and from 5,359px to 2,080px at 320.
+- **Episode tabs follow a clear.** Clearing the last chamber of an episode selects the newly unlocked episode's tab, so returning to the index opens the next circuit instead of the finished one.
 - **Daily return.** A deterministic daily chamber gives the campaign a reason to come back after the 54 stars are collected. Its result and streak are stored separately from campaign progress, so a featured chamber never unlocks the campaign out of order.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.

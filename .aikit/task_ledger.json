@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "daily-relay",
+    "task_id": "push-window-review",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794131790.4092937,
+    "updated_at": 1794133354.4221592,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794131792.0282576
+    "completed_at": 1794133354.801956
   },
   "checkpoints": [
-    {
-      "task_id": "mobile-tall-fit",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Plan: height-fit the 23-row Confluence on phones at a 24px cell floor, keeping the page-scroll fallback when the floor cannot fit",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794109953.1281037,
-      "timestamp_str": "2026-11-08 06:52:33",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "At 390x844 the Confluence board is 340x711 starting at y=264 and ending at 974, 130px below the fold; at 320x568 it ends at 867, 299px below. The player cannot see both ends of the relay while solving, and the 24px floor is already guaranteed by the README.",
-        "benefits": "At 390 the whole 11x23 relay fits in the viewport at about 24px cells; at 320 the board keeps 24px cells and the existing page scroll remains the fallback. Normal and wide boards keep their current sizing.",
-        "risks": "contract: compact fit path gains a height branch; dependency: none; concurrency: none; state: no save change; layout: the tall frame becomes 283px wide at 390, leaving whitespace, and the game foot may sit just below the fold.",
-        "mitigation": "Pure fitBoardWidth mobile cases, 390/320 before/after measurements, a played Confluence clear at 390 and 320, desktop regression geometry and the 18-level run."
-      },
-      "plan_digest": "6f9a09f683609b8cbc507495e651e26aa1fa416cebfa47052ee41faeb474fbc1"
-    },
-    {
-      "task_id": "mobile-tall-fit",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/4] Implemented: TALL_MIN_CELL 24, compact tall-board height fit with 8px reserve and material-shrink guard, 320/landscape fallback, two fit tests, README and ADR-028",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794110441.5472357,
-      "timestamp_str": "2026-11-08 07:00:41",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "mobile-tall-fit",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Verified: npm test 112/112; aikit check 5/5; Confluence 390 board 269x562/24.5px/bottom 826 whole, 320 keeps 24.5px and scroll, landscape 552 tall; 13-tap clears at 390 and 320; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794110441.9458776,
-      "timestamp_str": "2026-11-08 07:00:41",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "mobile-tall-fit",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'mobile-tall-fit' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794110461.6436179,
-      "timestamp_str": "2026-11-08 07:01:01",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "mobile-chamber-tabs",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794131792.0282593,
       "timestamp_str": "2026-11-08 12:56:32",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "push-window-review",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Plan: verify cumulative push windows 1->3 and 1->6 at their exact endpoints, review each diff, fix every surviving gap, then push the 1->9 endpoint",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133353.6778183,
+      "timestamp_str": "2026-11-08 13:22:33",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "The previous cumulative verification covered the pre-mobile wave. The current wave added mobile layout, undo, restart confirmation and Daily Relay without a fresh cumulative review, so historical endpoints and cross-feature interactions need evidence.",
+        "benefits": "The review fixes an explicit episode-tab dead end, makes daily best stars explicit, adds lifetime daily stats and preserves an all-time streak after gaps or history pruning.",
+        "risks": "contract: adds episodeIdAfterLevel, dailyStats and streak.best; dependency: none; concurrency: none; state: daily record migration is backward compatible; layout: profile gains two stats only.",
+        "mitigation": "Isolated worktrees at each endpoint, failing-first helper tests, played episode/daily replays at 390 and 320, profile stats at both widths, 18-level regression and full gates."
+      },
+      "plan_digest": "753ed65d873680c5aa293e0cbd099e405df943b6c50ac8583c07f5358127de0a"
+    },
+    {
+      "task_id": "push-window-review",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/3] Implemented: episodeIdAfterLevel and tab advance, daily bestStars and Best today cell, dailyStats profile totals, durable streak.best with backward-compatible normalization, ADR-033 and cycle 26",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133354.0360842,
+      "timestamp_str": "2026-11-08 13:22:34",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "push-window-review",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Verified: 1->3 115/115; 1->6 133/133; 1->9 139/139; episode tab returns Refraction; worse daily replay shows Best today 6/3; profile 4 relays/4 streak and 1 current/4 best at 390/320; 18/18 levels at par; aikit 5/5; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133354.4221592,
+      "timestamp_str": "2026-11-08 13:22:34",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "push-window-review",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-window-review' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794133354.8019578,
+      "timestamp_str": "2026-11-08 13:22:34",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

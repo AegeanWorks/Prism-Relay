@@ -30,6 +30,7 @@ import {
   isUnlocked,
   loadProgress,
   nextEpisodeId,
+  episodeIdAfterLevel,
   rankProgress,
   recordResult,
   saveProgress,
@@ -45,6 +46,7 @@ import { starLabel, starsMarkup } from "./stars.js";
 import {
   dailyDateLabelForKey,
   dailyLevelId,
+  dailyStats,
   dailySummary,
   dateKey,
   loadDaily,
@@ -133,6 +135,8 @@ const elements = {
   profileStatStars: document.getElementById("profile-stat-stars"),
   profileStatPerfect: document.getElementById("profile-stat-perfect"),
   profileStatMoves: document.getElementById("profile-stat-moves"),
+  profileStatDaily: document.getElementById("profile-stat-daily"),
+  profileStatStreak: document.getElementById("profile-stat-streak"),
   profileEpisodes: document.getElementById("profile-episodes"),
   profileMusic: document.getElementById("profile-music"),
   profileSfx: document.getElementById("profile-sfx"),
@@ -848,6 +852,7 @@ function finishLevel() {
       stars,
       moves: state.session.moves,
       bestMoves: state.daily.days[state.dailyDate]?.moves ?? state.session.moves,
+      bestStars: state.daily.days[state.dailyDate]?.stars ?? stars,
       daily: true,
       dailyDate: state.dailyDate,
       streak: summary.streak,
@@ -855,6 +860,10 @@ function finishLevel() {
       saveFailed: !saved,
     };
   } else {
+    const nextEpisodeTab = episodeIdAfterLevel(level.id);
+    if (nextEpisodeTab) {
+      state.chamberEpisode = nextEpisodeTab;
+    }
     const previousBest = state.progress.best[level.id] ?? null;
     state.progress = recordResult(
       state.progress,
@@ -1235,7 +1244,7 @@ function openVictoryModal() {
         <dl class="result-grid">
           <div><dt>Moves</dt><dd>${result.moves}</dd></div>
           <div><dt>Par</dt><dd>${level.par}</dd></div>
-          <div><dt>Today</dt><dd>${result.bestMoves}</dd></div>
+          <div><dt>Best today</dt><dd>${result.bestMoves} · ${result.bestStars} stars</dd></div>
         </dl>
         <p class="modal__fine">Daily results stay separate; campaign progress is unchanged.</p>
         ${saveWarning}
@@ -1311,6 +1320,13 @@ function renderProfile() {
   elements.profileStatStars.textContent = `${stats.stars} / ${stats.totalStars}`;
   elements.profileStatPerfect.textContent = String(stats.perfect);
   elements.profileStatMoves.textContent = String(stats.moves);
+  const lifetimeDaily = dailyStats(state.daily);
+  if (elements.profileStatDaily) {
+    elements.profileStatDaily.textContent = String(lifetimeDaily.totalDays);
+  }
+  if (elements.profileStatStreak) {
+    elements.profileStatStreak.textContent = String(lifetimeDaily.bestStreak);
+  }
   elements.profileMusic.checked = state.progress.music;
   elements.profileSfx.checked = state.progress.sound;
   for (const option of elements.sigilOptions) {

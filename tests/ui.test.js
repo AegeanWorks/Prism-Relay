@@ -87,10 +87,17 @@ test("panels and cues expose screenshot and accessibility markers", () => {
   assert.match(html, /data-cue="hud-stars"/);
   assert.match(html, /data-cue="daily-status"/);
   assert.match(html, /data-cue="daily-streak"/);
+  assert.match(html, /data-cue="profile-daily"/);
+  assert.match(html, /data-cue="profile-streak"/);
   assert.match(html, /data-cue="board-pan-hint"/);
   assert.match(html, /data-cue="profile-rank"/);
   assert.match(html, /data-cue="profile-rank-next"/);
   assert.match(html, /aria-live|data-cue/);
+});
+
+test("the profile reports lifetime daily relay totals", () => {
+  assert.match(html, /id="profile-stat-daily"/);
+  assert.match(html, /id="profile-stat-streak"/);
 });
 
 test("topbar controls keep a 44px touch target on coarse pointers", () => {

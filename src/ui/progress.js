@@ -250,3 +250,13 @@ export function nextEpisodeId(progress) {
   );
   return next ? episodeForLevel(next.id).id : EPISODES[0].id;
 }
+
+export function episodeIdAfterLevel(levelId) {
+  const index = LEVELS.findIndex((level) => level.id === levelId);
+  if (index < 0 || index >= LEVELS.length - 1) {
+    return null;
+  }
+  const current = episodeForLevel(levelId);
+  const next = episodeForLevel(LEVELS[index + 1].id);
+  return next.id === current.id ? null : next.id;
+}

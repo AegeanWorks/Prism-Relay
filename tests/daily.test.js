@@ -6,6 +6,7 @@ import {
   dailyDateLabel,
   dailyLevelId,
   dailyLevelIdForKey,
+  dailyStats,
   dailySummary,
   loadDaily,
   normalizeDaily,
@@ -46,7 +47,7 @@ test("invalid dates fall back to the first chamber instead of throwing", () => {
 test("a first daily clear starts a one-day streak and stores the result", () => {
   const daily = recordDailyResult(normalizeDaily(null), "2026-01-01", "first-light", 1, 3);
   assert.deepEqual(daily.days["2026-01-01"], { moves: 1, stars: 3 });
-  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-01" });
+  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-01", best: 1 });
 });
 
 test("replaying a day keeps the better result but does not grow the streak", () => {
@@ -54,19 +55,29 @@ test("replaying a day keeps the better result but does not grow the streak", () 
   daily = recordDailyResult(daily, "2026-01-01", "first-light", 1, 3);
   daily = recordDailyResult(daily, "2026-01-01", "first-light", 4, 1);
   assert.deepEqual(daily.days["2026-01-01"], { moves: 1, stars: 3 });
-  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-01" });
+  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-01", best: 1 });
 });
 
 test("consecutive daily clears grow the streak", () => {
   let daily = recordDailyResult(normalizeDaily(null), "2026-01-01", "first-light", 1, 3);
   daily = recordDailyResult(daily, "2026-01-02", "split-decision", 2, 3);
-  assert.deepEqual(daily.streak, { count: 2, last: "2026-01-02" });
+  assert.deepEqual(daily.streak, { count: 2, last: "2026-01-02", best: 2 });
 });
 
 test("a missed day resets the streak to one", () => {
   let daily = recordDailyResult(normalizeDaily(null), "2026-01-01", "first-light", 1, 3);
   daily = recordDailyResult(daily, "2026-01-03", "mirror-maze", 3, 3);
-  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-03" });
+  assert.deepEqual(daily.streak, { count: 1, last: "2026-01-03", best: 1 });
+});
+
+test("the all-time best streak survives a gap and a reset", () => {
+  let daily = recordDailyResult(normalizeDaily(null), "2026-01-01", "first-light", 1, 3);
+  daily = recordDailyResult(daily, "2026-01-02", "split-decision", 2, 3);
+  daily = recordDailyResult(daily, "2026-01-03", "mirror-maze", 3, 3);
+  daily = recordDailyResult(daily, "2026-01-05", "crossfire", 4, 3);
+  assert.equal(daily.streak.count, 1);
+  assert.equal(daily.streak.best, 3);
+  assert.equal(dailyStats(daily).bestStreak, 3);
 });
 
 test("a streak stays alive until the end of the following day", () => {
@@ -103,7 +114,8 @@ test("a corrupt or future daily record falls back safely", () => {
     streak: { count: 400, last: "2026-01-03" },
   });
   assert.deepEqual(Object.keys(cleaned.days), ["2026-01-01"]);
-  assert.equal(cleaned.streak.count, 60);
+  assert.equal(cleaned.streak.count, 400);
+  assert.equal(cleaned.streak.best, 400);
 });
 
 test("the daily store keeps the most recent sixty days", () => {
@@ -127,4 +139,22 @@ test("the daily store saves, loads and refuses a future version", () => {
   assert.deepEqual(loadDaily(storage), daily);
   assert.deepEqual(loadDaily(fakeStorage("not json")), normalizeDaily(null));
   assert.equal(saveDaily(fakeStorage(JSON.stringify({ version: 2 })), daily), false);
+});
+
+test("dailyStats counts played days and the longest consecutive run", () => {
+  let daily = normalizeDaily(null);
+  daily = recordDailyResult(daily, "2026-01-01", "first-light", 1, 3);
+  daily = recordDailyResult(daily, "2026-01-02", "split-decision", 2, 3);
+  daily = recordDailyResult(daily, "2026-01-03", "mirror-maze", 3, 3);
+  daily = recordDailyResult(daily, "2026-01-05", "crossfire", 4, 3);
+  assert.deepEqual(dailyStats(daily), { totalDays: 4, bestStreak: 3 });
+});
+
+test("a stored streak remains the best streak after old days are pruned", () => {
+  const daily = normalizeDaily({
+    version: 1,
+    days: { "2026-01-01": { moves: 1, stars: 3 } },
+    streak: { count: 12, last: "2026-01-01" },
+  });
+  assert.deepEqual(dailyStats(daily), { totalDays: 1, bestStreak: 12 });
 });

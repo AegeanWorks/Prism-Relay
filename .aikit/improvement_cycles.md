@@ -33,8 +33,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 23 | Undo last rotation | done |
 | 24 | Restart confirmation | done |
 | 25 | Daily Relay and streak | done |
+| 26 | Push-window review 1→9 | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 and the retention/safety cycles 23–25 were added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22, retention/safety cycles 23–25, and the cumulative push-window review 26 were added afterward.
 
 ---
 
@@ -1919,3 +1920,79 @@ Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; fr
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(daily): add a date-driven daily relay and streak`.
+
+---
+
+## Cycle 26 - Push-window review 1→3, 1→6, 1→9
+
+**Date**: 2026-11-08
+
+### FIND
+
+This run applied the cumulative-window method from the earlier push verification to the wave that
+followed `e04a546`. The baseline is `a922836` (the first commit after the previous verification
+push), so window `1->3` ends at `091367e` and window `1->6` ends at `e88fc01`.
+
+Each endpoint was checked out in an isolated worktree and tested at its exact commit:
+
+| Window | Endpoint | New commits | Tests | Finding |
+|---|---|---|---|---|
+| 1 -> 3 | `091367e` | wide-board pan, tall-board fit, episode tabs | **115/115** | A player who explicitly selected an episode tab stayed on that completed episode after clearing its finale; the newly unlocked episode was not selected on return. |
+| 1 -> 6 | `e88fc01` | undo, restart confirmation, Daily Relay | **133/133** | A daily replay could show the current run's stars beside the day's best moves, with no best-star value; the profile had no lifetime daily totals; a best streak could be lost once it fell outside the 60-day history and a new streak reset the count. |
+| 1 -> 9 | this commit | episode-tab advance, daily best clarity, profile daily stats, all-time best streak | **139/139** | All three findings fixed and replayed; no further defect survived review. |
+
+### ANALYZE
+
+- Survivor: derive the next episode from level order (`episodeIdAfterLevel`) and select its tab only
+  when a campaign episode actually ends. A mid-episode clear keeps the current tab; the final chamber
+  has no next episode and keeps the finale tab.
+- Survivor: keep the daily victory's top stars as the current run, but label the third result cell
+  **Best today** with both best moves and best stars. A worse replay therefore cannot look like the
+  day's result regressed.
+- Survivor: compute lifetime daily totals from the normalized daily record (`dailyStats`) and show
+  total played days plus the best streak in the profile.
+- Survivor: persist `streak.best` in the daily record and normalize older records as `best = count`.
+  This keeps an all-time streak after a gap and after the 60-day result window prunes old days.
+- Killed: storing the daily history forever. The result window stays at 60 days; only the best streak
+  is durable.
+- Killed: changing the campaign save. All daily fields remain under `prism-relay.daily.v1`.
+
+### IMPLEMENT
+
+Failing-first: two `episodeIdAfterLevel` cases and two `dailyStats` cases failed before the helpers
+existed; the best-streak tests failed before `streak.best` was persisted.
+
+Files:
+- `src/ui/progress.js`: `episodeIdAfterLevel(levelId)`.
+- `src/ui/daily.js`: `dailyStats`, `streak.best` normalization and recording.
+- `src/ui/app.js`: select the next episode tab after a campaign episode clear; daily `bestStars`;
+  Best today result cell; profile daily totals.
+- `index.html`: profile Daily relays / Best streak stats and screenshot cues.
+- `tests/progress.test.js` (+2), `tests/daily.test.js` (+3 and updated streak shapes),
+  `tests/ui.test.js` (profile cues and IDs).
+- `README.md`, `.aikit/decisions.md` ADR-033.
+
+### PROOF
+
+- **1->3 endpoint**: `node --test tests` -> 115/115. Before the fix, a played `the-vault` clear with
+  the Ignition tab explicitly selected returned to **EP I / ignition**; after the fix it returns to
+  **EP II / refraction**, with only the Refraction grid visible.
+- **1->6 endpoint**: `node --test tests` -> 133/133. The review probes exposed the daily replay and
+  profile gaps above.
+- **1->9**: `node --test tests` -> **139/139**. A seeded profile with four daily days shows
+  **Daily relays 4 / Best streak 4** at 390 and 320 with no horizontal overflow. A daily replay
+  scored at **8 moves/2 stars** shows **Best today 6 · 3 stars**, while the title card keeps
+  **6 moves · 3 stars** and the **4-day streak**. A record with current streak 1 and stored best 4
+  shows **Best streak 4** in the profile.
+- Full regression play: all 18 chambers at exact par with 3 stars, 0 console errors.
+  Report: `.review/cycles/cycle-26/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 139 tests, 139 pass, 0 fail (was 133 at the 1->6 endpoint).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `cue: profile-daily` and `cue: profile-streak`.
+- `node --check src/ui/app.js`, `src/ui/daily.js`, `src/ui/progress.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `fix(ui): close episode-tab and daily-best review gaps`.

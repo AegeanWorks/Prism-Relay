@@ -10,6 +10,7 @@ import {
   normalizeCallsign,
   normalizeProgress,
   nextEpisodeId,
+  episodeIdAfterLevel,
   rankFor,
   rankProgress,
   recordResult,
@@ -281,6 +282,18 @@ test("nextEpisodeId falls back to Ignition after a full clear", () => {
   }
   const progress = normalizeProgress({ version: 1, unlocked: ["first-light"], best });
   assert.equal(nextEpisodeId(progress), "ignition");
+});
+
+test("an episode-clear transition names the newly unlocked episode", () => {
+  assert.equal(episodeIdAfterLevel("the-vault"), "refraction");
+  assert.equal(episodeIdAfterLevel("white-noise"), "crossing");
+  assert.equal(episodeIdAfterLevel("long-way-home"), "confluence");
+});
+
+test("a mid-episode or final chamber keeps the current episode tab", () => {
+  assert.equal(episodeIdAfterLevel("crossfire"), null);
+  assert.equal(episodeIdAfterLevel("the-confluence"), null);
+  assert.equal(episodeIdAfterLevel("not-a-level"), null);
 });
 
 test("statsFor derives completion, perfect runs, stars and moves", () => {
