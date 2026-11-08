@@ -32,8 +32,9 @@ Screenshots and generated reports live in the local, git-ignored `.review/cycles
 | 22 | Mobile / chamber episode tabs | done |
 | 23 | Undo last rotation | done |
 | 24 | Restart confirmation | done |
+| 25 | Daily Relay and streak | done |
 
-**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22, the cycle 23 undo feature and the cycle 24 restart guard were added afterward.
+**Run status**: the 19-cycle improvement run completed with zero findings; mobile follow-up cycles 20–22 and the retention/safety cycles 23–25 were added afterward.
 
 ---
 
@@ -1837,3 +1838,84 @@ Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; de
 - Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
 
 Commit: `feat(ui): confirm a restart after the first move`.
+
+---
+
+## Cycle 25 - Daily Relay and streak
+
+**Date**: 2026-11-08
+
+### FIND
+
+All 18 chambers were campaign-only. Once the 54 stars were collected there was no reason to return,
+and the earlier store analysis named that missing retention hook. A daily challenge gives one
+date-driven run without adding a second campaign or changing the save version.
+
+Baseline evidence: `.review/cycles/cycle-25/daily-title-390.png` (fresh title card) and
+`daily-victory-390.png` (first daily clear).
+
+### ANALYZE
+
+- Survivor: map each local calendar day to one chamber from a fixed 2026-01-01 epoch, cycling through
+  all eighteen. The mapping is deterministic and needs no network call.
+- Survivor: keep the daily record in `prism-relay.daily.v1` with the last sixty results and a
+  `{count, last}` streak. Campaign best, stars and unlocks stay byte-for-byte untouched.
+- Survivor: the title card shows today's chamber, today's best and the streak, and starts the daily
+  directly from any campaign state. A featured chamber may be locked in the campaign; that is the
+  point of a separate challenge.
+- Survivor: replaying a day keeps the better result and does not extend the streak again; a streak
+  stays alive through the end of the following day.
+- Survivor: a daily victory has its own modal copy and actions (Back to title / Play again) and does
+  not offer campaign Next chamber.
+- Killed: merging daily results into `progress.best`. That would unlock campaign chambers out of
+  order and make the campaign star total ambiguous.
+- Killed: a real-time clock or server check. The local date is enough for a single-player offline
+  puzzle and keeps the game backend-free.
+- Killed: a 365-day archive. Sixty days is enough to show a streak and keeps the record small.
+
+### IMPLEMENT
+
+Failing-first: eleven `tests/daily.test.js` cases failed before `src/ui/daily.js` existed; one
+`postVictoryAction({daily:true})` case failed before the daily branch.
+
+Files:
+- `src/ui/daily.js`: date key, epoch mapping, date label, normalization, load/save, summary and
+  `recordDailyResult` with best-result and streak rules.
+- `index.html`: `daily-run` title card with date, level, status and streak cues.
+- `src/ui/app.js`: daily state, title rendering, daily start/header, separate finish/save branch,
+  daily victory modal, and Back to title action.
+- `src/ui/hints.js`: `postVictoryAction` returns Back to title for a daily result.
+- `src/styles.css`: title card, row at 361–520px, stacked card at 360px and below.
+- `tests/daily.test.js` (+11), `tests/hints.test.js` (+1), `tests/ui.test.js` control/cue contract.
+- `README.md`, `.aikit/decisions.md` ADR-032.
+
+No engine, level, campaign-save or inventory change.
+
+### PROOF
+
+Same setup: headless Edge 157; mobile/touch emulation at 390x844 and 320x568; fresh storage.
+
+- **Title 390**: Daily Relay · 08 NOV, The Vault, Not run yet, Start a streak; card 367x66 at
+  y574–640; page width 390. **Title 320**: card 301x112 stacked below the CTAs, page width 320;
+  scrolled capture shows the full card.
+- **Daily run**: the game header reads “Daily relay / 08 NOV”, the chamber is The Vault, and a real
+  six-tap solve clears it at **6 moves, par 6, 3 stars**.
+- **Separate save**: the victory modal says Daily relay cleared / Streak started, and the daily key
+  contains `2026-11-08: {moves:6, stars:3}` with `streak {count:1,last:"2026-11-08"}`. The campaign
+  record is still absent on the fresh profile; the title remains 00/54 stars and Best moves “—”.
+- **Return and replay**: Back to title shows “6 moves · 3 stars” and “1-day streak”; replaying the
+  same day keeps the streak at 1 and the same best. Starting First Light afterwards restores
+  “Episode I / Chamber 01” while the daily record remains intact.
+- Full regression play: all 18 chambers at exact par with 3 stars, 0 console errors.
+  Report: `.review/cycles/cycle-25/play-report-1440x900.json`.
+
+### GATES
+
+- `npm test` -> 133 tests, 133 pass, 0 fail (was 121; +11 daily cases and +1 daily victory action).
+- `python aikit.py check prism-relay` -> 5/5 gates passed: test, mechanics, hygiene, guidelines, secrets.
+- `npm run ui:snapshot` -> adds `control: daily-run` and `cue: daily-date`, `daily-status`,
+  `daily-streak`.
+- `node --check src/ui/app.js`, `src/ui/daily.js` -> syntax ok.
+- Playwright root run: 18/18 levels ok, 0 page errors, 0 console errors.
+
+Commit: `feat(daily): add a date-driven daily relay and streak`.

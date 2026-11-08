@@ -14,6 +14,7 @@ const requiredControls = [
   "sound-toggle",
   "open-howto",
   "start-game",
+  "daily-run",
   "open-chambers",
   "back-to-title",
   "chamber-grid",
@@ -84,6 +85,8 @@ test("panels and cues expose screenshot and accessibility markers", () => {
   assert.match(html, /data-cue="status-line"/);
   assert.match(html, /data-cue="game-chapter"/);
   assert.match(html, /data-cue="hud-stars"/);
+  assert.match(html, /data-cue="daily-status"/);
+  assert.match(html, /data-cue="daily-streak"/);
   assert.match(html, /data-cue="board-pan-hint"/);
   assert.match(html, /data-cue="profile-rank"/);
   assert.match(html, /data-cue="profile-rank-next"/);

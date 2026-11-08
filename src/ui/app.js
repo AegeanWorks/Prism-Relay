@@ -42,6 +42,15 @@ import { feedbackFor, livePortalPairs, newlyLitKeys, portalTransitKey } from "./
 import { parHint, postVictoryAction, relayCtaLabel, restartPrompt, saveStatusMessage } from "./hints.js";
 import { mechanicNotes } from "./mechanics.js";
 import { starLabel, starsMarkup } from "./stars.js";
+import {
+  dailyDateLabelForKey,
+  dailyLevelId,
+  dailySummary,
+  dateKey,
+  loadDaily,
+  recordDailyResult,
+  saveDaily,
+} from "./daily.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const storage = (() => {
@@ -72,6 +81,11 @@ const elements = {
   profileChipSigil: document.getElementById("profile-chip-sigil"),
   titleStars: document.getElementById("title-stars"),
   titleBest: document.getElementById("title-best"),
+  dailyRun: document.querySelector('[data-ui="daily-run"]'),
+  dailyDate: document.getElementById("daily-date"),
+  dailyLevel: document.getElementById("daily-level"),
+  dailyStatus: document.getElementById("daily-status"),
+  dailyStreak: document.getElementById("daily-streak"),
   startLabel: document.getElementById("start-label"),
   chamberGrid: document.getElementById("chamber-grid"),
   chamberTabs: document.getElementById("episode-tabs"),
@@ -128,8 +142,10 @@ const elements = {
 
 const state = {
   progress: loadProgress(storage),
+  daily: loadDaily(storage),
   screen: "title",
   chamberEpisode: null,
+  dailyDate: null,
   level: null,
   session: null,
   completed: false,
@@ -189,6 +205,32 @@ function updateTitleStats() {
   elements.titleBest.textContent = stats.completed > 0 ? `${stats.moves} moves` : "—";
   if (elements.startLabel) {
     elements.startLabel.textContent = relayCtaLabel(stats.completed, stats.totalLevels);
+  }
+  const today = new Date();
+  const summary = dailySummary(state.daily, today);
+  const dailyLevel = LEVELS.find((level) => level.id === summary.levelId) ?? LEVELS[0];
+  const status = summary.result
+    ? `${summary.result.moves} moves · ${summary.result.stars} stars`
+    : "Not run yet";
+  const streak = summary.streak > 0 ? `${summary.streak}-day streak` : "Start a streak";
+  if (elements.dailyDate) {
+    elements.dailyDate.textContent = summary.label;
+  }
+  if (elements.dailyLevel) {
+    elements.dailyLevel.textContent = dailyLevel.name;
+  }
+  if (elements.dailyStatus) {
+    elements.dailyStatus.textContent = status;
+  }
+  if (elements.dailyStreak) {
+    elements.dailyStreak.textContent = streak;
+  }
+  if (elements.dailyRun) {
+    elements.dailyRun.dataset.level = summary.levelId;
+    elements.dailyRun.setAttribute(
+      "aria-label",
+      `Daily relay for ${summary.label}: ${dailyLevel.name}. ${summary.result ? `${summary.result.moves} moves, ${summary.result.stars} stars` : "Not run yet"}. ${streak}.`,
+    );
   }
 }
 
@@ -358,6 +400,7 @@ function startLevel(levelId, options = {}) {
   closeModal();
   state.level = level;
   state.session = createSession(level);
+  state.dailyDate = options.dailyDate ?? null;
   state.completed = false;
   state.paused = false;
   state.result = null;
@@ -679,7 +722,9 @@ function updateGameView() {
   const episode = episodeForLevel(state.level.id);
   const total = board.receivers.length;
   const lit = state.session.litCount;
-  elements.gameChapter.textContent = `Episode ${episode?.number ?? "I"} / Chamber ${state.level.chapter}`;
+  elements.gameChapter.textContent = state.dailyDate
+    ? `Daily relay / ${dailyDateLabelForKey(state.dailyDate)}`
+    : `Episode ${episode?.number ?? "I"} / Chamber ${state.level.chapter}`;
   elements.gameTitle.textContent = state.level.name;
   elements.gameSubtitle.textContent = state.level.subtitle;
   elements.hudMoves.textContent = String(state.session.moves);
@@ -788,28 +833,50 @@ function finishLevel() {
   const nextEpisode = next ? episodeForLevel(next.id) : null;
   const episodeComplete = !next || nextEpisode.id !== episode.id;
   const stars = state.session.stars || starsFor(state.session.moves, level.par);
-  const previousBest = state.progress.best[level.id] ?? null;
   state.session.stars = stars;
-  state.progress = recordResult(
-    state.progress,
-    level.id,
-    state.session.moves,
-    stars,
-    next?.id ?? null,
-  );
-  const saved = saveProgress(storage, state.progress);
-  state.result = {
-    stars,
-    moves: state.session.moves,
-    previousBest: previousBest?.moves ?? null,
-    bestMoves: state.progress.best[level.id]?.moves ?? state.session.moves,
-    next: next?.id ?? null,
-    nextEpisode: nextEpisode?.number ?? null,
-    episodeComplete,
-    episodeNumber: episode?.number ?? "I",
-    preview: false,
-    saveFailed: !saved,
-  };
+  if (state.dailyDate) {
+    state.daily = recordDailyResult(
+      state.daily,
+      state.dailyDate,
+      level.id,
+      state.session.moves,
+      stars,
+    );
+    const saved = saveDaily(storage, state.daily);
+    const summary = dailySummary(state.daily, new Date());
+    state.result = {
+      stars,
+      moves: state.session.moves,
+      bestMoves: state.daily.days[state.dailyDate]?.moves ?? state.session.moves,
+      daily: true,
+      dailyDate: state.dailyDate,
+      streak: summary.streak,
+      preview: false,
+      saveFailed: !saved,
+    };
+  } else {
+    const previousBest = state.progress.best[level.id] ?? null;
+    state.progress = recordResult(
+      state.progress,
+      level.id,
+      state.session.moves,
+      stars,
+      next?.id ?? null,
+    );
+    const saved = saveProgress(storage, state.progress);
+    state.result = {
+      stars,
+      moves: state.session.moves,
+      previousBest: previousBest?.moves ?? null,
+      bestMoves: state.progress.best[level.id]?.moves ?? state.session.moves,
+      next: next?.id ?? null,
+      nextEpisode: nextEpisode?.number ?? null,
+      episodeComplete,
+      episodeNumber: episode?.number ?? "I",
+      preview: false,
+      saveFailed: !saved,
+    };
+  }
   updateGameView();
   updateTitleStats();
   updateTopbarStatus();
@@ -1149,6 +1216,38 @@ function openVictoryModal() {
       : result.stars === 2
         ? "Relay closed. A cleaner path is still waiting."
         : "Relay closed. There is a sharper route through the light.";
+  if (result.daily) {
+    const saveWarning = result.saveFailed
+      ? `<p class="modal__fine">Today's daily result is not being stored.</p>`
+      : "";
+    const streakLine =
+      result.streak > 1
+        ? `<p><strong>${result.streak}-day streak.</strong> Return tomorrow to keep it alive.</p>`
+        : `<p><strong>Streak started.</strong> Return tomorrow to keep it alive.</p>`;
+    openModal({
+      kind: "victory",
+      kicker: "Daily relay cleared",
+      title: level.name,
+      stars: result.stars,
+      bodyHtml: `
+        <p>${message}</p>
+        ${streakLine}
+        <dl class="result-grid">
+          <div><dt>Moves</dt><dd>${result.moves}</dd></div>
+          <div><dt>Par</dt><dd>${level.par}</dd></div>
+          <div><dt>Today</dt><dd>${result.bestMoves}</dd></div>
+        </dl>
+        <p class="modal__fine">Daily results stay separate; campaign progress is unchanged.</p>
+        ${saveWarning}
+      `,
+      primary: { label: "Back to title", run: () => showScreen("title") },
+      secondary: {
+        label: "Play again",
+        run: () => startLevel(level.id, { dailyDate: result.dailyDate }),
+      },
+    });
+    return;
+  }
   const episodeLine = result.episodeComplete
     ? `<p><strong>Episode ${result.episodeNumber} complete.</strong>${result.nextEpisode ? ` Episode ${result.nextEpisode} is now open.` : " Every relay is closed."}</p>`
     : "";
@@ -1513,6 +1612,10 @@ function bindEvents() {
   document.querySelectorAll('[data-ui="start-game"]').forEach((button) => {
     button.addEventListener("click", () => startLevel(nextPlayableLevel().id));
   });
+  elements.dailyRun?.addEventListener("click", () => {
+    const now = new Date();
+    startLevel(dailyLevelId(now), { dailyDate: dateKey(now) });
+  });
   document.querySelectorAll('[data-ui="open-chambers"]').forEach((button) => {
     button.addEventListener("click", () => {
       audio.playUi();
@@ -1550,9 +1653,9 @@ function bindEvents() {
       return;
     }
     if (action.levelId) {
-      startLevel(action.levelId);
+      startLevel(action.levelId, action.dailyDate ? { dailyDate: action.dailyDate } : {});
     } else {
-      showScreen("chambers");
+      showScreen(action.screen ?? "chambers");
     }
   });
   document.querySelectorAll('[data-ui="pause-game"]').forEach((button) => {

@@ -22,6 +22,13 @@ test("invalid pars fall back to a readable phrase instead of NaN", () => {
   assert.equal(parHint(-2), "Par is 0 moves. Every rotation counts.");
 });
 
+test("a daily victory returns to the title instead of the campaign", () => {
+  assert.deepEqual(postVictoryAction({ daily: true }), {
+    label: "Back to title",
+    screen: "title",
+  });
+});
+
 test("a completed chamber with a next level offers the next chamber", () => {
   assert.deepEqual(postVictoryAction({ next: "split-decision" }), {
     label: "Next chamber →",

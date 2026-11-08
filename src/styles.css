@@ -234,6 +234,83 @@ dd {
   margin-top: var(--space-6);
 }
 
+.daily-card {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-ui);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(100deg, var(--beam-cyan-soft), transparent 55%),
+    var(--glass-soft);
+  color: var(--paper);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--speed-fast) var(--ease-out),
+    background var(--speed-fast) var(--ease-out),
+    transform var(--speed-fast) var(--ease-out);
+}
+
+.daily-card:hover {
+  border-color: var(--beam-cyan);
+  background:
+    linear-gradient(100deg, var(--beam-cyan-soft), transparent 70%),
+    var(--glass);
+}
+
+.daily-card:active {
+  transform: scale(0.99);
+}
+
+.daily-card:focus-visible {
+  outline: 2px solid var(--beam-cyan);
+  outline-offset: 3px;
+}
+
+.daily-card__main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.daily-card__kicker {
+  color: var(--beam-cyan);
+  font-family: var(--font-mono);
+  font-size: var(--size-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.daily-card__name {
+  font-family: var(--font-display);
+  font-size: var(--size-lg);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+}
+
+.daily-card__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--size-2xs);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.daily-card__streak {
+  color: var(--gold);
+}
+
 .button {
   display: inline-flex;
   min-height: 50px;
@@ -1796,6 +1873,16 @@ dd {
     width: 100%;
   }
 
+  .daily-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .daily-card__meta {
+    align-items: flex-start;
+  }
+
   .title-stats {
     justify-content: space-between;
     gap: var(--space-3);
@@ -1879,6 +1966,18 @@ dd {
 
   .metric strong {
     font-size: var(--size-body);
+  }
+}
+
+@media (min-width: 361px) and (max-width: 520px) {
+  .daily-card {
+    align-items: center;
+    flex-direction: row;
+    gap: var(--space-4);
+  }
+
+  .daily-card__meta {
+    align-items: flex-end;
   }
 }
 

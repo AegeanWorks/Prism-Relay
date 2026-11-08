@@ -7,6 +7,9 @@ export function postVictoryAction(result) {
   if (!result) {
     return null;
   }
+  if (result.daily) {
+    return { label: "Back to title", screen: "title" };
+  }
   if (result.next) {
     return { label: "Next chamber →", levelId: result.next };
   }

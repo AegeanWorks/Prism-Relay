@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "restart-confirm",
+    "task_id": "daily-relay",
     "last_phase": "in_progress",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794130206.6970677,
+    "updated_at": 1794131790.4092937,
     "owner": "opencode:deepseek-v4.1-flash",
     "started_by": "opencode:deepseek-v4.1-flash",
     "continuations": [],
-    "completed_at": 1794130207.0694766
+    "completed_at": 1794131792.0282576
   },
   "checkpoints": [
-    {
-      "task_id": "mobile-wide-pan",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Plan: let wide chambers pan horizontally at a 28px cell floor on narrow screens instead of shrinking to 16px/12.8px targets, with an orientation hint",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794108835.8283927,
-      "timestamp_str": "2026-11-08 06:33:55",
-      "agent": "opencode:deepseek-v4.1-flash",
-      "impact_assessment": {
-        "why": "Crosscurrent is 21x7 and currently fills the phone width, producing 16.2px cells at 390x844 and 12.8px at 320x568, below the 24px target floor and error-prone for taps. The whole board fits at 29px cells in landscape, but portrait needs either a rotate prompt or a pannable board.",
-        "benefits": "Portrait players get 28px cells and a swipeable board with a visible 'Swipe / rotate' hint; landscape keeps the whole 29px-cell board. Normal and tall boards keep their current sizing.",
-        "risks": "contract: board and beam layer move into a scroll stage; dependency: none; concurrency: none; state: no save change; layout: the board frame stays full width while the stage can be wider, and the beam SVG must fill the stage so paths stay aligned.",
-        "mitigation": "Pure wideBoardNeedsPan cases, stage/cell measurements at 390 portrait and 844 landscape, beam alignment screenshots, a real Crosscurrent tap clear in portrait, a non-wide Confluence regression check, and the 18-level run."
-      },
-      "plan_digest": "c88188b07c1e107fe4fa6fa12cb0c1dbaba03e4fa4b27d09ee5df1ac274f0dc4"
-    },
-    {
-      "task_id": "mobile-wide-pan",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/4] Implemented: board viewport/stage wrapper, wideBoardNeedsPan with three tests, 28px stage floor on compact wide boards, swipe/rotate hint, beam inset alignment, minmax grid containment, README and ADR-027",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794109739.2607155,
-      "timestamp_str": "2026-11-08 06:48:59",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "mobile-wide-pan",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Verified: npm test 110/110; aikit check 5/5; Crosscurrent 28px cells at 390 and 320, hint visible, page width unchanged, landscape 29.1px no hint, 9-tap portrait clear 3 stars; 18/18 levels at par; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794109739.653627,
-      "timestamp_str": "2026-11-08 06:48:59",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
-    {
-      "task_id": "mobile-wide-pan",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'mobile-wide-pan' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794109760.0457838,
-      "timestamp_str": "2026-11-08 06:49:20",
-      "agent": "opencode:deepseek-v4.1-flash"
-    },
     {
       "task_id": "mobile-tall-fit",
       "phase": "in_progress",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794130207.0694804,
       "timestamp_str": "2026-11-08 12:30:07",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "daily-relay",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/5] Plan: add a deterministic Daily Relay on the title screen with its own saved result and streak, leaving campaign progress untouched",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794130461.4797702,
+      "timestamp_str": "2026-11-08 12:34:21",
+      "agent": "opencode:deepseek-v4.1-flash",
+      "impact_assessment": {
+        "why": "The game has 18 handcrafted chambers but no reason to return after they are cleared. The earlier store analysis flagged the missing retention hook; a daily chamber gives one concrete, date-driven run without changing the campaign or save version.",
+        "benefits": "Every local day maps to one of the 18 chambers. The title card shows today's chamber, today's best and the current streak; clearing it saves separately, updates a consecutive-day streak and offers Back to title or Play again. A fresh player sees a featured chamber without unlocking campaign shortcuts.",
+        "risks": "contract: adds a separate prism-relay.daily.v1 key, daily controls and a daily victory branch; dependency: none; concurrency: none; state: new normalized daily record, campaign best/unlocks untouched; layout: a new title card must fit 390 and 320 without pushing the CTA off screen.",
+        "mitigation": "Pure daily-selection, streak, gap, replay, corrupt-save and pruning cases; a 390/320 title and victory probe; a real played daily clear and replay; campaign progress equality checks; the 18-level regression and full gates."
+      },
+      "plan_digest": "f2be64e1f73f6c75e45f085f6995a5942ccd9ebf4f6fa32ef14712e83598697e"
+    },
+    {
+      "task_id": "daily-relay",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/5] Implemented: daily date mapping and streak store, title card, daily start/header, separate finish/save branch, daily victory modal, Back to title action, responsive card, README and ADR-032",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794131787.7450397,
+      "timestamp_str": "2026-11-08 12:56:27",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "daily-relay",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/5] Verified: npm test 133/133; aikit check 5/5; fresh profile The Vault daily cleared in 6 taps/3 stars; daily key date+streak 1, campaign 00/54 and no best; replay keeps streak 1; normal level header restored; 390/320 no overflow; 18/18 levels at par; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794131790.4092937,
+      "timestamp_str": "2026-11-08 12:56:30",
+      "agent": "opencode:deepseek-v4.1-flash"
+    },
+    {
+      "task_id": "daily-relay",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'daily-relay' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794131792.0282593,
+      "timestamp_str": "2026-11-08 12:56:32",
       "agent": "opencode:deepseek-v4.1-flash"
     }
   ]

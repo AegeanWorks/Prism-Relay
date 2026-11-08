@@ -53,6 +53,10 @@ Moves are counted per rotation. Each chamber advertises a par, the shortest poss
 
 Every episode ends with a larger, harder finale. Par rises from 1 move in First Light to 13 moves in The Long Way Home and The Confluence.
 
+### Daily Relay
+
+The title screen features one date-driven chamber per local day, cycling through all eighteen chambers. It is a standalone challenge: today's best and a consecutive-day streak live under `prism-relay.daily.v1`, while campaign stars, unlocks and best moves are unchanged. Clearing it starts or extends a streak; replaying the same day keeps the better result and does not extend the streak again. A streak stays alive through the end of the following day.
+
 ### Operator Profile and Audio
 
 The profile stores a callsign (up to 18 characters), one of four sigils, rank, chamber and star totals, perfect routes, total best moves, per-episode progress, and audio preferences. Rank climbs from Cadet through Operator, Weaver, Architect and Lumen to Relay Master at all 54 stars. The profile also names the next rank and how many stars remain to reach it.
@@ -95,6 +99,7 @@ prism-relay/
 │   │   ├── cues.js            <- state-derived charge and portal sound decisions
 │   │   ├── hints.js           <- pluralized par, save-status and post-victory copy
 │   │   ├── layout.js          <- viewport fit arithmetic for tall chambers
+│   │   ├── daily.js           <- date-driven chamber, daily best and streak store
 │   │   ├── mechanics.js       <- per-chamber splitter, portal and prism notes
 │   │   ├── progress.js        <- versioned saves, profile, rank and statistics
 │   │   └── stars.js           <- filled and outlined star markup and labels
@@ -106,6 +111,7 @@ prism-relay/
     ├── progress.test.js       <- saves, profile, rank, unlocks, audio settings
     ├── server.test.js         <- path containment, traversal refusal, launcher helpers
     ├── layout.test.js         <- viewport fit arithmetic for tall chambers
+    ├── daily.test.js          <- daily selection, streak and daily-store cases
     ├── cues.test.js           <- charge and portal transit cue decisions
     ├── hints.test.js          <- par, save-status and post-victory copy
     ├── mechanics.test.js      <- per-chamber mechanic notes
@@ -127,6 +133,7 @@ prism-relay/
 - **Wide boards pan on phones.** Crosscurrent keeps 28px cells on narrow screens by panning inside the board frame with a swipe/rotate hint; normal and tall boards keep their current sizing, so every board cell is at least 24px on phones.
 - **Tall boards fit when they can.** On a 390px phone the 11x23 finale height-fits at 24.5px cells with the whole relay visible; a 320px screen keeps the 24px floor and the existing page scroll.
 - **Episode tabs on phones.** Phones show four episode tabs and one episode grid at a time; desktop keeps all four episodes visible. The index drops from 5,224px to 1,997px at 390 and from 5,359px to 2,080px at 320.
+- **Daily return.** A deterministic daily chamber gives the campaign a reason to come back after the 54 stars are collected. Its result and streak are stored separately from campaign progress, so a featured chamber never unlocks the campaign out of order.
 - **Charge impact.** A receiver that first lights gets a one-shot white ring shockwave; the persistent lit pulse then takes over, and resetting the chamber clears the burst immediately.
 - **Fanfare headroom.** The victory fanfare ducks the ambient pad to 28% for about a second and restores it after 1.8s; the duck is a no-op when music or effects are off.
 - **Audible navigation.** Every navigation arrow, topbar control and dialog open or close plays the same short UI tone; screenshot query modes stay silent because the calls live in click and key handlers.
