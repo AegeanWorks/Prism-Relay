@@ -1431,20 +1431,23 @@ build, whose full 18/18 played run at exact par is recorded in cycle 18.
 
 Commit: `docs(cycles): record the zero-finding verification sweep`.
 
+## Push verification run - cumulative windows to End
 
+**Date**: 2026-11-08
 
+Verified every cumulative window at its exact commit with `node --test tests`, reviewed the new
+diff for defects/gaps, then pushed the window to `origin/master` without force.
 
+| Window | Endpoint | New commits | Tests | Remote after push |
+|---|---|---|---|---|
+| 1 -> 3 | `c26c428` | fit tall chambers, audio cues, live portal pairs | 76/76 | `c26c428` |
+| 1 -> 6 | `f82ba02` | compact par, future-save guard, post-victory next action | 85/85 | `f82ba02` |
+| 1 -> 9 | `08eb3ea` | honest save status, live star pace, outlined stars | 91/91 | `08eb3ea` |
+| 1 -> 12 | `75b386c` | charge burst, prism note, pinned modal actions | 100/100 | `75b386c` |
+| 1 -> 15 | `6784622` | rank progress, last-move marker, endgame CTA | 106/106 | `6784622` |
+| 1 -> 18 | `d0a14b0` | victory duck, navigation cues, forced-colors toggles | 107/107 | `d0a14b0` |
+| 1 -> End | `fae2f58` | zero-finding verification record | 107/107 | `fae2f58` |
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+No new defect or gap survived review; no code change was needed in this run. Final
+`python aikit.py check prism-relay` -> 5/5 gates; `origin/master` equals local HEAD; working tree
+clean. Pushes used the AIKit publish environment because direct pushes are guarded.
