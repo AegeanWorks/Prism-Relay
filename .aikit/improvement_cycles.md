@@ -1939,7 +1939,10 @@ Each endpoint was checked out in an isolated worktree and tested at its exact co
 |---|---|---|---|---|
 | 1 -> 3 | `091367e` | wide-board pan, tall-board fit, episode tabs | **115/115** | A player who explicitly selected an episode tab stayed on that completed episode after clearing its finale; the newly unlocked episode was not selected on return. |
 | 1 -> 6 | `e88fc01` | undo, restart confirmation, Daily Relay | **133/133** | A daily replay could show the current run's stars beside the day's best moves, with no best-star value; the profile had no lifetime daily totals; a best streak could be lost once it fell outside the 60-day history and a new streak reset the count. |
-| 1 -> 9 | this commit | episode-tab advance, daily best clarity, profile daily stats, all-time best streak | **139/139** | All three findings fixed and replayed; no further defect survived review. |
+| 1 -> 9 | `de3d757` | episode-tab advance, daily best clarity, profile daily stats, all-time best streak | **139/139** | All three findings fixed and replayed; no further defect survived review. |
+
+Final `1 -> End` verification at `de3d757`: **139/139** tests, **5/5** gates, 18/18 played at
+exact par, and `origin/master` equals local HEAD. The temporary endpoint worktrees were removed.
 
 ### ANALYZE
 
