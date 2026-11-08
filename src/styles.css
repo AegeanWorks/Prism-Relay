@@ -311,6 +311,30 @@ dd {
   color: var(--gold);
 }
 
+.daily-card__history {
+  display: flex;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.daily-card__day {
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--line-ui);
+  border-radius: var(--radius-round);
+  background: transparent;
+}
+
+.daily-card__day.is-played {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+
+.daily-card__day.is-today {
+  outline: 1px solid var(--beam-cyan);
+  outline-offset: 2px;
+}
+
 .button {
   display: inline-flex;
   min-height: 50px;

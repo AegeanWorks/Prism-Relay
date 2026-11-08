@@ -87,6 +87,7 @@ test("panels and cues expose screenshot and accessibility markers", () => {
   assert.match(html, /data-cue="hud-stars"/);
   assert.match(html, /data-cue="daily-status"/);
   assert.match(html, /data-cue="daily-streak"/);
+  assert.match(html, /data-cue="daily-history"/);
   assert.match(html, /data-cue="profile-daily"/);
   assert.match(html, /data-cue="profile-streak"/);
   assert.match(html, /data-cue="board-pan-hint"/);

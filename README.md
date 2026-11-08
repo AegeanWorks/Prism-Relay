@@ -55,7 +55,7 @@ Every episode ends with a larger, harder finale. Par rises from 1 move in First 
 
 ### Daily Relay
 
-The title screen features one date-driven chamber per local day, cycling through all eighteen chambers. It is a standalone challenge: today's best and a consecutive-day streak live under `prism-relay.daily.v1`, while campaign stars, unlocks and best moves are unchanged. Clearing it starts or extends a streak; replaying the same day keeps the better result and does not extend the streak again. A streak stays alive through the end of the following day. The profile adds lifetime daily relays and the all-time best streak, and a daily victory names the best result for that day separately from the current run.
+The title screen features one date-driven chamber per local day, cycling through all eighteen chambers. It is a standalone challenge: today's best and a consecutive-day streak live under `prism-relay.daily.v1`, while campaign stars, unlocks and best moves are unchanged. Clearing it starts or extends a streak; replaying the same day keeps the better result and does not extend the streak again. A streak stays alive through the end of the following day. A seven-dot strip on the title card shows the last seven days, with today outlined. The profile adds lifetime daily relays and the all-time best streak, and a daily victory names the best result for that day separately from the current run.
 
 ### Operator Profile and Audio
 

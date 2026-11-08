@@ -220,6 +220,29 @@ export function dailyStats(daily) {
   };
 }
 
+export function dailyHistory(daily, date = new Date(), length = 7) {
+  const normalized = normalizeDaily(daily);
+  const today = dateKey(date);
+  if (!today) {
+    return [];
+  }
+  const count = Number.isInteger(length) ? Math.min(Math.max(length, 1), 30) : 7;
+  const keys = [today];
+  while (keys.length < count) {
+    const previous = previousDateKey(keys[keys.length - 1]);
+    if (!previous) {
+      break;
+    }
+    keys.push(previous);
+  }
+  return keys.reverse().map((key) => ({
+    key,
+    label: dailyDateLabelForKey(key),
+    played: Boolean(normalized.days[key]),
+    today: key === today,
+  }));
+}
+
 export function recordDailyResult(daily, key, levelId, moves, stars) {
   const normalized = normalizeDaily(daily);
   if (

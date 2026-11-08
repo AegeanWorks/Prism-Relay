@@ -4,6 +4,7 @@ import {
   DAILY_KEY,
   DAILY_VERSION,
   dailyDateLabel,
+  dailyHistory,
   dailyLevelId,
   dailyLevelIdForKey,
   dailyStats,
@@ -157,4 +158,32 @@ test("a stored streak remains the best streak after old days are pruned", () => 
     streak: { count: 12, last: "2026-01-01" },
   });
   assert.deepEqual(dailyStats(daily), { totalDays: 1, bestStreak: 12 });
+});
+
+test("the daily history shows seven chronological played flags", () => {
+  let daily = normalizeDaily(null);
+  daily = recordDailyResult(daily, "2026-01-01", "first-light", 1, 3);
+  daily = recordDailyResult(daily, "2026-01-03", "mirror-maze", 3, 3);
+  daily = recordDailyResult(daily, "2026-01-07", "double-down", 4, 3);
+  const history = dailyHistory(daily, day(2026, 0, 7));
+  assert.equal(history.length, 7);
+  assert.deepEqual(
+    history.map((entry) => [entry.key, entry.played, entry.today]),
+    [
+      ["2026-01-01", true, false],
+      ["2026-01-02", false, false],
+      ["2026-01-03", true, false],
+      ["2026-01-04", false, false],
+      ["2026-01-05", false, false],
+      ["2026-01-06", false, false],
+      ["2026-01-07", true, true],
+    ],
+  );
+});
+
+test("the daily history clamps an invalid length to one day", () => {
+  const history = dailyHistory(normalizeDaily(null), day(2026, 0, 7), 0);
+  assert.equal(history.length, 1);
+  assert.equal(history[0].today, true);
+  assert.equal(history[0].played, false);
 });

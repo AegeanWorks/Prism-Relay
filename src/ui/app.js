@@ -45,6 +45,7 @@ import { mechanicNotes } from "./mechanics.js";
 import { starLabel, starsMarkup } from "./stars.js";
 import {
   dailyDateLabelForKey,
+  dailyHistory,
   dailyLevelId,
   dailyStats,
   dailySummary,
@@ -88,6 +89,7 @@ const elements = {
   dailyLevel: document.getElementById("daily-level"),
   dailyStatus: document.getElementById("daily-status"),
   dailyStreak: document.getElementById("daily-streak"),
+  dailyHistory: document.getElementById("daily-history"),
   startLabel: document.getElementById("start-label"),
   chamberGrid: document.getElementById("chamber-grid"),
   chamberTabs: document.getElementById("episode-tabs"),
@@ -217,6 +219,19 @@ function updateTitleStats() {
     ? `${summary.result.moves} moves · ${summary.result.stars} stars`
     : "Not run yet";
   const streak = summary.streak > 0 ? `${summary.streak}-day streak` : "Start a streak";
+  const history = dailyHistory(state.daily, today);
+  const played = history.filter((entry) => entry.played).length;
+  if (elements.dailyHistory) {
+    elements.dailyHistory.replaceChildren();
+    for (const entry of history) {
+      const dot = document.createElement("span");
+      dot.className = "daily-card__day";
+      dot.classList.toggle("is-played", entry.played);
+      dot.classList.toggle("is-today", entry.today);
+      dot.dataset.date = entry.key;
+      elements.dailyHistory.append(dot);
+    }
+  }
   if (elements.dailyDate) {
     elements.dailyDate.textContent = summary.label;
   }
@@ -233,7 +248,7 @@ function updateTitleStats() {
     elements.dailyRun.dataset.level = summary.levelId;
     elements.dailyRun.setAttribute(
       "aria-label",
-      `Daily relay for ${summary.label}: ${dailyLevel.name}. ${summary.result ? `${summary.result.moves} moves, ${summary.result.stars} stars` : "Not run yet"}. ${streak}.`,
+      `Daily relay for ${summary.label}: ${dailyLevel.name}. ${summary.result ? `${summary.result.moves} moves, ${summary.result.stars} stars` : "Not run yet"}. ${streak}. Played ${played} of the last ${history.length} days.`,
     );
   }
 }
